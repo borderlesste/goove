@@ -1,5 +1,6 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
 import { HttpError, readJsonBody } from "../_shared/http.ts";
+import { authorizeOwner } from "../_shared/owner.ts";
 const url = Deno.env.get("SUPABASE_URL")!;
 const db = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false, autoRefreshToken: false },
@@ -97,32 +98,7 @@ async function owner(req: Request) {
   if (!token) throw new HttpError(401, "Owner sign-in is required.");
   const { data, error } = await db.auth.getUser(token);
   if (error || !data.user) throw new HttpError(401, "Please sign in again.");
-  let allowed = unwrap(
-    await db
-      .from("goove_owners")
-      .select("user_id")
-      .eq("user_id", data.user.id)
-      .maybeSingle(),
-  );
-  if (!allowed && data.user.email_confirmed_at && data.user.email) {
-    const invite = unwrap(
-      await db
-        .from("goove_owner_invitations")
-        .select("email")
-        .eq("email", data.user.email.toLowerCase())
-        .maybeSingle(),
-    );
-    if (invite) {
-      unwrap(await db.from("goove_owners").upsert({ user_id: data.user.id }));
-      allowed = { user_id: data.user.id };
-    }
-  }
-  if (!allowed)
-    throw new HttpError(
-      403,
-      "This account is not authorized for owner access.",
-    );
-  return data.user.id;
+  return authorizeOwner(db, data.user);
 }
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });

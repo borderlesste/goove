@@ -109,7 +109,7 @@ export function Admin({ onCatalogChange }) {
         });
         if (error) throw error;
         setNotice(
-          "Check your email to confirm your account, then return here and sign in. Only the invited owner email can access the studio.",
+          "Check your email to confirm your account, then return here and sign in. The first registered account receives administrator access automatically; additional owners need an invitation.",
         );
         setSignup(false);
         setPassword("");
@@ -214,13 +214,13 @@ export function Admin({ onCatalogChange }) {
         </h2>
         <p>
           {signup
-            ? "Create your invited owner account."
+            ? "Create your account and confirm your email."
             : "Sign in to manage your collection and customer rewards."}
         </p>
         <p className="fine" id="owner-help">
           {signup
-            ? "Use the email address invited by Goove, then confirm it before signing in."
-            : "For invited owners only. Customer reward access codes are entered on Gifts & Rewards."}
+            ? "The first registered account is the administrator. Additional owners need an invitation from the administrator."
+            : "For the administrator and invited owners. Customer reward access codes are entered on Gifts & Rewards."}
         </p>
         <form
           onSubmit={login}

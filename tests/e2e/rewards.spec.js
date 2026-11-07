@@ -269,6 +269,51 @@ test("Owner access opens the studio and protects an in-flight sign-in", async ({
   await expect(page.getByRole("alert")).toHaveCount(0);
 });
 
+test("signup sends credentials to Auth and explains first-account administrator access", async ({
+  page,
+}) => {
+  let signup;
+  let adminRequests = 0;
+  await mockApi(page, (route) => {
+    adminRequests += 1;
+    return route.fulfill({ json: {} });
+  });
+  await page.route("**/auth/v1/signup*", (route) => {
+    signup = route.request().postDataJSON();
+    return route.fulfill({
+      json: {
+        user: {
+          id: "44444444-4444-4444-8444-444444444444",
+          email: signup.email,
+          identities: [],
+        },
+        session: null,
+      },
+    });
+  });
+  await page.goto("/admin");
+  await page
+    .getByRole("button", { name: "First time? Set up your owner account" })
+    .click();
+  await expect(page.locator("#owner-help")).toContainText(
+    "The first registered account is the administrator.",
+  );
+  await page.getByLabel("Email address").fill("new-owner@example.test");
+  await page.getByLabel("Password", { exact: true }).fill("test-password-only");
+  await page
+    .getByRole("button", { name: "CREATE OWNER ACCOUNT", exact: true })
+    .click();
+  await expect(page.getByRole("status")).toContainText(
+    "first registered account receives administrator access automatically",
+  );
+  expect(signup.email).toBe("new-owner@example.test");
+  expect(signup.password).toBe("test-password-only");
+  expect(signup).not.toHaveProperty("role");
+  expect(signup.data || {}).not.toHaveProperty("role");
+  expect(adminRequests).toBe(0);
+  await expect(page.getByLabel("Password", { exact: true })).toHaveValue("");
+});
+
 test("an existing owner session stays in a loading state until the server authorizes it", async ({
   page,
 }) => {

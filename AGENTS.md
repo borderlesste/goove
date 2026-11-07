@@ -2,6 +2,13 @@
 
 Repository workflow: work directly on `main`. Do not create worktrees, feature branches, or pull requests. Verify changes before pushing to `main`.
 
+Account policy: the first registered, non-anonymous email account receives
+administrator membership automatically. Require email confirmation before owner
+API access. Later accounts need an explicit owner invitation. Keep the initial
+administrator decision closed after user deletion or access revocation. Supabase
+Auth owns account credentials in `auth.users`; owner permissions use
+`public.goove_owners`.
+
 ## Development tools
 
 Ponytail, ECC, and Agency Agents are installed as project-local skills in

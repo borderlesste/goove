@@ -5,7 +5,7 @@ import {PGlite} from '@electric-sql/pglite';
 
 test('PostgreSQL reward lifecycle, permanent locks, expiry and access boundaries',async()=>{
  const db=new PGlite();
- await db.exec('create role anon; create role authenticated; create role service_role bypassrls; create schema auth; create table auth.users(id uuid primary key);');
+ await db.exec('create role anon; create role authenticated; create role service_role bypassrls; create schema auth; create table auth.users(id uuid primary key, email text, created_at timestamptz default now(), email_confirmed_at timestamptz, is_anonymous boolean default false, deleted_at timestamptz);');
  await db.exec(await readFile(new URL('../supabase/schema.sql',import.meta.url),'utf8'));
  const migrationDir=new URL('../supabase/migrations/',import.meta.url);
  for(const file of (await readdir(migrationDir)).filter(file=>file.endsWith('.sql')).sort()) {

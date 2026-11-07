@@ -49,9 +49,27 @@ the build. Unprefixed Supabase integration variables alone do not configure Vite
 All direct browser table access is denied. Public catalog and reward requests go
 through the Edge Function; every admin action verifies a live Auth user against
 the owner allowlist. RLS without browser policies is intentional for these tables.
-Owner invitation emails must be provisioned by a trusted database administrator.
 
-Deploy `goove-api` with its `../_shared/http.ts` dependency and keep
+Accounts created from `/admin` are sent directly to Supabase Auth through
+`supabase.auth.signUp`. Supabase stores identities, emails, and password hashes
+in **`auth.users`**; inspect them under **Authentication → Users** in the Supabase
+dashboard. The Auth schema is deliberately excluded from the public Data API.
+Do not duplicate credentials in a `public.users` table.
+
+The first non-anonymous email account automatically receives a row in
+`public.goove_owners` through an Auth signup trigger. Its email must be confirmed
+before the owner API grants access. Subsequent users require an explicit invitation
+in `public.goove_owner_invitations`, provisioned by a trusted administrator.
+User-editable metadata never assigns owner privileges.
+
+`goove_private.initial_administrator` records the one-time bootstrap decision.
+Its singleton primary key arbitrates simultaneous signups; deleting the initial
+user or revoking its owner row does not reopen setup. The bootstrap migration
+seeds the earliest existing email account and preserves other existing owners.
+An administrator who loses access must recover it through a trusted database
+administrator rather than creating another account to reclaim ownership.
+
+Deploy `goove-api` with its `../_shared/http.ts` and `../_shared/owner.ts` dependencies and keep
 `verify_jwt = false` as defined in `supabase/config.toml`: the catalog is public,
 reward actions validate access codes, and admin actions perform their own user and
 owner checks. Inspect the target project before any database deployment.
@@ -60,6 +78,9 @@ owner checks. Inspect the target project before any database deployment.
 SQL files record historical changes and must not be replayed indiscriminately on
 production. New reviewed changes live in `supabase/migrations/`. The trigger
 permission migration is safe to repeat and leaves automatic RLS enforcement active.
+For a new database, apply the bootstrap schema and then the incremental migrations
+in version order. Existing production databases must receive only their pending
+migrations; do not replay the bootstrap schema.
 
 Workflow: work and publish directly on `main`, without worktrees or PRs, per the
 repository owner's instruction. Run verification before pushing.
