@@ -514,6 +514,15 @@ footer p {
   font-size: 13px;
   margin-bottom: 18px;
 }
+.email-confirmation {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+.email-confirmation > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 .empty {
   padding: 80px 20px;
   text-align: center;

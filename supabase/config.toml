@@ -1,5 +1,9 @@
 project_id = "goove"
 
+[auth]
+site_url = "https://goove.vercel.app/"
+additional_redirect_urls = ["https://goove.vercel.app/"]
+
 [functions.goove-api]
 # The endpoint has public catalog/code actions and explicitly checks Auth + owner
 # membership for every admin action. No privileged operation relies on this flag.

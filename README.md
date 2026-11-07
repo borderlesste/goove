@@ -56,6 +56,37 @@ in **`auth.users`**; inspect them under **Authentication → Users** in the Supa
 dashboard. The Auth schema is deliberately excluded from the public Data API.
 Do not duplicate credentials in a `public.users` table.
 
+### Email confirmation
+
+The public return URL is **`https://goove.vercel.app/`**, including the trailing
+slash. Signup and confirmation resend use this fixed URL, rather than the domain
+of a local or preview deployment. The landing page handles expired/invalid links
+and shows confirmation only after Supabase validates a confirmed identity. It
+removes callback details from the displayed URL; it never grants owner access.
+The owner API still requires confirmed email and owner membership.
+
+In [Authentication → URL Configuration](https://supabase.com/dashboard/project/kjvtlelsqtnwiotnxaji/auth/url-configuration),
+set **Site URL** to `https://goove.vercel.app/` and add the exact same URL to
+**Redirect URLs**. Remove obsolete production aliases after checking whether any
+other clients still use them. Avoid production wildcard redirects. In the
+confirmation email template, keep the verification link as
+`<a href="{{ .ConfirmationURL }}">Confirm your email</a>` so Supabase verifies the
+token before returning to Goove. A bare Site URL does not confirm an account.
+
+`supabase/config.toml` records these intended Auth URLs. Committing that file does
+**not** change hosted Auth settings. The connected Supabase MCP tools do not expose
+Auth configuration; use the dashboard or a narrowly scoped Management API update.
+Do not push the entire local configuration to production just to change two URLs,
+because unspecified Auth settings could also be affected.
+
+For a real delivery check, create an account under `/admin`, open the latest
+confirmation email, and verify that the final page is the canonical root with a
+confirmation message. Continue to owner access, then test re-opening the same
+link and using **Resend confirmation email** with an unconfirmed account. Browser
+tests mock Auth and do not send email. A live invalid-token probe during the
+2026-11-07 review still fell back to the old Vercel SSO-protected alias; the hosted
+Site URL must be corrected independently of the application deployment.
+
 The first non-anonymous email account automatically receives a row in
 `public.goove_owners` through an Auth signup trigger. Its email must be confirmed
 before the owner API grants access. Subsequent users require an explicit invitation

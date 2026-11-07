@@ -1,5 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { formatPromoActiveAt } from "./dateTime";
+import { readEmailConfirmation, confirmEmailReturn } from "./emailConfirmation";
+// Capture the result before Supabase consumes a successful confirmation hash.
+const emailCallback = readEmailConfirmation(window.location.href);
 export const configured = Boolean(
   import.meta.env.VITE_SUPABASE_URL &&
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -10,6 +13,18 @@ export const supabase = configured
       import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     )
   : null;
+export const emailConfirmation = confirmEmailReturn(
+  supabase?.auth,
+  emailCallback,
+).finally(() => {
+  if (emailCallback) {
+    history.replaceState(
+      history.state,
+      "",
+      location.pathname + location.search,
+    );
+  }
+});
 export const sampleBags = [
   [
     "day-tote",

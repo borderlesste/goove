@@ -9,6 +9,10 @@ administrator decision closed after user deletion or access revocation. Supabase
 Auth owns account credentials in `auth.users`; owner permissions use
 `public.goove_owners`.
 
+Email confirmation must return to `https://goove.vercel.app/`. Keep signup's
+`emailRedirectTo`, Supabase Auth Site URL, and the exact redirect allowlist aligned.
+Show success only after a confirmed identity is verified by Supabase Auth.
+
 ## Development tools
 
 Ponytail, ECC, and Agency Agents are installed as project-local skills in

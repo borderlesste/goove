@@ -273,6 +273,7 @@ test("signup sends credentials to Auth and explains first-account administrator 
   page,
 }) => {
   let signup;
+  let redirectTo;
   let adminRequests = 0;
   await mockApi(page, (route) => {
     adminRequests += 1;
@@ -280,6 +281,7 @@ test("signup sends credentials to Auth and explains first-account administrator 
   });
   await page.route("**/auth/v1/signup*", (route) => {
     signup = route.request().postDataJSON();
+    redirectTo = new URL(route.request().url()).searchParams.get("redirect_to");
     return route.fulfill({
       json: {
         user: {
@@ -307,6 +309,7 @@ test("signup sends credentials to Auth and explains first-account administrator 
     "first registered account receives administrator access automatically",
   );
   expect(signup.email).toBe("new-owner@example.test");
+  expect(redirectTo).toBe("https://goove.vercel.app/");
   expect(signup.password).toBe("test-password-only");
   expect(signup).not.toHaveProperty("role");
   expect(signup.data || {}).not.toHaveProperty("role");

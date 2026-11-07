@@ -13,6 +13,7 @@ import {
   defaultSettings,
   whatsappBagUrl,
   whatsappPromoUrl,
+  emailConfirmation,
 } from "./api";
 import { Admin } from "./Admin";
 const money = (value) =>
@@ -59,7 +60,8 @@ export function App() {
       settings: defaultSettings,
     }),
     [loading, setLoading] = useState(true),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [confirmation, setConfirmation] = useState(null);
   async function refresh() {
     try {
       setCatalog(await loadCatalog());
@@ -70,6 +72,13 @@ export function App() {
       setLoading(false);
     }
   }
+  useEffect(() => {
+    let active = true;
+    emailConfirmation.then((result) => active && setConfirmation(result));
+    return () => {
+      active = false;
+    };
+  }, []);
   useEffect(() => {
     refresh();
     const pop = () => setPath(location.pathname);
@@ -117,6 +126,24 @@ export function App() {
         </nav>
       </header>
       <main>
+        {confirmation && (
+          <section className="email-confirmation section-wrap">
+            <p
+              className={confirmation === "confirmed" ? "notice" : "error"}
+              role={confirmation === "confirmed" ? "status" : "alert"}
+            >
+              {confirmation === "confirmed"
+                ? "Your email is confirmed. Continue to owner access to manage your account."
+                : confirmation === "expired"
+                  ? "This email confirmation link has expired or has already been used. Try signing in if you have already confirmed your email; otherwise request a new confirmation link."
+                  : "We could not confirm your email. Open the latest confirmation email and try again."}
+            </p>
+            <a href="/admin" onClick={(e) => navigate(e, "/admin")}>
+              Continue to owner access{" "}
+              <ArrowRight size={16} aria-hidden="true" />
+            </a>
+          </section>
+        )}
         {adminPage ? (
           <section className="owner-page">
             <a className="back-link" href="/" onClick={(e) => navigate(e, "/")}>

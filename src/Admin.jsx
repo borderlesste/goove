@@ -7,12 +7,14 @@ import { Trash } from "@phosphor-icons/react/dist/csr/Trash";
 import { UploadSimple } from "@phosphor-icons/react/dist/csr/UploadSimple";
 import { SpinnerGap } from "@phosphor-icons/react/dist/csr/SpinnerGap";
 import { formatPromoActiveAt } from "./dateTime";
+import { EMAIL_CONFIRMATION_URL } from "./emailConfirmation";
 const money = (value) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
     Number(value),
   );
 export function Admin({ onCatalogChange }) {
   const sessionVersion = useRef(0);
+  const emailInput = useRef(null);
   const [data, setData] = useState(null),
     [tab, setTab] = useState("Claims"),
     [email, setEmail] = useState(""),
@@ -21,6 +23,7 @@ export function Admin({ onCatalogChange }) {
     [checkingSession, setCheckingSession] = useState(Boolean(supabase)),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
+    [resending, setResending] = useState(false),
     [notice, setNotice] = useState(""),
     [editing, setEditing] = useState(null),
     [generated, setGenerated] = useState(""),
@@ -92,7 +95,7 @@ export function Admin({ onCatalogChange }) {
   }, []);
   async function login(e) {
     e.preventDefault();
-    if (busy) return;
+    if (busy || resending) return;
     setBusy(true);
     setError("");
     setNotice("");
@@ -105,11 +108,11 @@ export function Admin({ onCatalogChange }) {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: EMAIL_CONFIRMATION_URL },
         });
         if (error) throw error;
         setNotice(
-          "Check your email to confirm your account, then return here and sign in. The first registered account receives administrator access automatically; additional owners need an invitation.",
+          "Check your email to confirm your account. The link returns to goove.vercel.app; choose Continue to owner access to sign in. The first registered account receives administrator access automatically; additional owners need an invitation.",
         );
         setSignup(false);
         setPassword("");
@@ -140,6 +143,29 @@ export function Admin({ onCatalogChange }) {
       setError(e.message);
     } finally {
       setBusy(false);
+    }
+  }
+  async function resendConfirmation() {
+    if (busy || resending || !emailInput.current.reportValidity()) return;
+    setResending(true);
+    setError("");
+    setNotice("");
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email.trim(),
+        options: { emailRedirectTo: EMAIL_CONFIRMATION_URL },
+      });
+      if (error) throw error;
+      setNotice(
+        "If this account needs confirmation, a new link will arrive by email. Open the latest link to return to goove.vercel.app.",
+      );
+    } catch {
+      setError(
+        "We could not send a confirmation link. Please wait a moment and try again.",
+      );
+    } finally {
+      setResending(false);
     }
   }
   async function exportRecords() {
@@ -224,18 +250,19 @@ export function Admin({ onCatalogChange }) {
         </p>
         <form
           onSubmit={login}
-          aria-busy={busy}
+          aria-busy={busy || resending}
           aria-describedby={error ? "owner-help owner-error" : "owner-help"}
         >
           <label htmlFor="owner-email">Email address</label>
           <input
             id="owner-email"
+            ref={emailInput}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="username"
-            disabled={busy}
+            disabled={busy || resending}
             autoCapitalize="none"
             spellCheck="false"
           />
@@ -248,18 +275,18 @@ export function Admin({ onCatalogChange }) {
             required
             minLength={signup ? 8 : 1}
             autoComplete={signup ? "new-password" : "current-password"}
-            disabled={busy}
+            disabled={busy || resending}
           />
           <label className="checkbox owner-show-password">
             <input
               type="checkbox"
               checked={showPassword}
               onChange={(e) => setShowPassword(e.target.checked)}
-              disabled={busy}
+              disabled={busy || resending}
             />{" "}
             Show password
           </label>
-          <button disabled={busy || !configured}>
+          <button disabled={busy || resending || !configured}>
             {busy
               ? signup
                 ? "CREATING ACCOUNT…"
@@ -271,7 +298,7 @@ export function Admin({ onCatalogChange }) {
         </form>
         <button
           className="quiet"
-          disabled={busy || !configured}
+          disabled={busy || resending || !configured}
           onClick={() => {
             setSignup(!signup);
             setError("");
@@ -284,6 +311,15 @@ export function Admin({ onCatalogChange }) {
             ? "Already registered? Sign in"
             : "First time? Set up your owner account"}
         </button>
+        {!signup && (
+          <button
+            className="quiet"
+            disabled={busy || resending || !configured}
+            onClick={resendConfirmation}
+          >
+            {resending ? "Sending confirmation…" : "Resend confirmation email"}
+          </button>
+        )}
         {notice && (
           <p className="notice" role="status">
             {notice}
