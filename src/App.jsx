@@ -59,8 +59,7 @@ export function App() {
       settings: defaultSettings,
     }),
     [loading, setLoading] = useState(true),
-    [error, setError] = useState(""),
-    [admin, setAdmin] = useState(false);
+    [error, setError] = useState("");
   async function refresh() {
     try {
       setCatalog(await loadCatalog());
@@ -120,6 +119,9 @@ export function App() {
       <main>
         {adminPage ? (
           <section className="owner-page">
+            <a className="back-link" href="/" onClick={(e) => navigate(e, "/")}>
+              <ArrowLeft size={16} /> Back to the collection
+            </a>
             <p className="eyebrow">OWNER ACCESS</p>
             <h1>Goove Studio</h1>
             <Admin onCatalogChange={refresh} />
@@ -274,15 +276,14 @@ export function App() {
             <br />
             Choose a bag marked available to order.
           </div>
-          <button className="quiet" onClick={() => setAdmin(true)}>
+          <a
+            className="quiet"
+            href="/admin"
+            onClick={(e) => navigate(e, "/admin")}
+          >
             Owner access
-          </button>
+          </a>
         </footer>
-      )}
-      {admin && !adminPage && (
-        <Modal title="Goove Studio" onClose={() => setAdmin(false)}>
-          <Admin onCatalogChange={refresh} />
-        </Modal>
       )}
     </>
   );
@@ -397,27 +398,37 @@ function Rewards({ catalog }) {
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const panel = useRef();
+  const accessInput = useRef();
+  const stageHeading = useRef();
+  const stage = state?.claim ? 2 : state ? 1 : 0;
+  const availableCount =
+    state?.codes?.filter((code) => code.status === "available").length || 0;
+  const phonePattern = "[+0-9\\(\\) .\\-]{7,30}";
+  function scrollToPanel() {
+    panel.current?.scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "instant"
+        : "smooth",
+      block: "start",
+    });
+  }
+  useEffect(() => {
+    if (!opened) return;
+    scrollToPanel();
+  }, [opened]);
+  useEffect(() => {
+    if (!opened) return;
+    (stage === 0 ? accessInput : stageHeading).current?.focus({
+      preventScroll: true,
+    });
+  }, [opened, stage]);
   const unlock = () => {
-    setOpened(true);
-    setTimeout(
-      () =>
-        panel.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
-      60,
-    );
+    if (opened) scrollToPanel();
+    else setOpened(true);
   };
   async function verify(e) {
-    e.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      setState(await callApi("verify", { access_code: access.trim() }));
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-  async function refreshCodes() {
+    e?.preventDefault();
+    if (busy) return;
     setBusy(true);
     setError("");
     try {
@@ -430,13 +441,27 @@ function Rewards({ catalog }) {
   }
   async function sendPromo(e) {
     e.preventDefault();
-    if (!choice || busy) return;
+    const rewardId = choice?.id || state?.claim?.reward_code_id;
+    if (!rewardId || busy) return;
+    const form = e.currentTarget;
+    form.elements.customer_name.setCustomValidity(
+      name.trim().length < 2
+        ? "Enter a name with at least two characters."
+        : "",
+    );
+    const digits = phone.replace(/\D/g, "").length;
+    form.elements.customer_phone.setCustomValidity(
+      digits < 7 || digits > 15
+        ? "Enter a phone number with 7 to 15 digits, including your country code."
+        : "",
+    );
+    if (!form.reportValidity()) return;
     setBusy(true);
     setError("");
     try {
       const result = await callApi("reserve", {
         access_code: access.trim(),
-        reward_code_id: choice.id,
+        reward_code_id: rewardId,
       });
       // Keep the immutable reservation recoverable even if WhatsApp cannot open.
       setState(result);
@@ -457,31 +482,13 @@ function Rewards({ catalog }) {
       setBusy(false);
     }
   }
-  async function resendReservedPromo(e) {
-    e.preventDefault();
-    if (busy) return;
-    setBusy(true);
+  function changeAccess() {
+    setState(null);
+    setChoice(null);
+    setAccess("");
+    setName("");
+    setPhone("");
     setError("");
-    try {
-      const result = await callApi("reserve", {
-        access_code: access.trim(),
-        reward_code_id: state.claim.reward_code_id,
-      });
-      const link = whatsappPromoUrl(
-        settings.whatsapp_number,
-        result.claim.code,
-        name.trim(),
-        phone.trim(),
-        result.claim.selected_at,
-      );
-      if (!link)
-        throw Error("Please contact our team to submit this promo code.");
-      window.location.assign(link);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
   }
   return (
     <>
@@ -495,6 +502,9 @@ function Rewards({ catalog }) {
           Thank you for choosing our handbag collection! Enter the one-time
           access code from our team to view the available promo codes.
         </p>
+        <button className="rewards-start" onClick={unlock}>
+          ENTER ACCESS CODE <ArrowRight size={20} />
+        </button>
       </section>
       <section className="section-wrap gifts-section">
         <div className="gift-grid">
@@ -526,9 +536,13 @@ function Rewards({ catalog }) {
           available while supplies last.
         </p>
       </section>
-      <section className="reward-section" ref={panel}>
+      <section
+        className="reward-section"
+        ref={panel}
+        aria-labelledby="reward-heading"
+      >
         <p className="eyebrow">RESERVED FOR OUR CUSTOMERS</p>
-        <h2>Choose your promo.</h2>
+        <h2 id="reward-heading">Choose your promo.</h2>
         <p>
           Use your one-time access code to see all codes for active promotions.
         </p>
@@ -538,8 +552,24 @@ function Rewards({ catalog }) {
           </button>
         ) : (
           <div className="reward-flow">
+            <ol className="steps" aria-label="Reward progress">
+              {["Access code", "Choose promo", "WhatsApp"].map(
+                (label, index) => (
+                  <li
+                    key={label}
+                    className={
+                      index === stage ? "current" : index < stage ? "done" : ""
+                    }
+                    aria-current={index === stage ? "step" : undefined}
+                  >
+                    <span aria-hidden="true">{index + 1}</span>
+                    {label}
+                  </li>
+                ),
+              )}
+            </ol>
             {!state ? (
-              <form onSubmit={verify}>
+              <form onSubmit={verify} aria-busy={busy}>
                 <h3>Your exclusive access</h3>
                 <p>
                   Enter the access code shared by Goove. It can be used once to
@@ -548,14 +578,28 @@ function Rewards({ catalog }) {
                 <label htmlFor="access">Access code</label>
                 <input
                   id="access"
+                  ref={accessInput}
                   value={access}
-                  onChange={(e) => setAccess(e.target.value)}
+                  onChange={(e) => {
+                    setAccess(e.target.value.replace(/\s/g, "").toUpperCase());
+                    setError("");
+                  }}
                   placeholder="Enter your access code"
                   autoComplete="off"
                   spellCheck="false"
+                  autoCapitalize="characters"
+                  aria-describedby={
+                    error ? "access-help reward-error" : "access-help"
+                  }
+                  aria-invalid={Boolean(error)}
+                  disabled={busy}
                   required
                   maxLength={100}
                 />
+                <p className="fine" id="access-help">
+                  Paste the full GOOVE- code shared by our team. Viewing the
+                  list does not use your selection.
+                </p>
                 <button disabled={busy}>
                   {busy ? "CHECKING…" : "VIEW MY PROMO CODES"}{" "}
                   <LockSimple size={18} />
@@ -567,37 +611,48 @@ function Rewards({ catalog }) {
                   <Check size={28} />
                 </span>
                 <p className="eyebrow">YOUR PROMO CODE</p>
-                <h3>{state.claim.code}</h3>
+                <h3 ref={stageHeading} tabIndex={-1}>
+                  {state.claim.code}
+                </h3>
                 <p>
                   This promo code is reserved for you. If WhatsApp didn’t open
                   earlier, enter your details below to send it now.
                 </p>
                 <form
                   className="promo-contact-form"
-                  onSubmit={resendReservedPromo}
+                  onSubmit={sendPromo}
+                  aria-busy={busy}
                 >
                   <label htmlFor="reserved-name">Name</label>
                   <input
                     id="reserved-name"
+                    name="customer_name"
                     autoComplete="name"
                     minLength={2}
                     maxLength={100}
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      e.target.setCustomValidity("");
+                      setName(e.target.value);
+                    }}
                   />
                   <label htmlFor="reserved-phone">Phone number</label>
                   <input
                     id="reserved-phone"
+                    name="customer_phone"
                     type="tel"
                     autoComplete="tel"
                     inputMode="tel"
-                    pattern="[+0-9() .-]{7,30}"
+                    pattern={phonePattern}
                     title="Enter a valid phone number"
                     maxLength={30}
                     required
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => {
+                      e.target.setCustomValidity("");
+                      setPhone(e.target.value);
+                    }}
                   />
                   <p className="fine">
                     The system selection date and time will be included in your
@@ -610,7 +665,13 @@ function Rewards({ catalog }) {
               </div>
             ) : (
               <>
-                <h3>Promo codes</h3>
+                <h3 ref={stageHeading} tabIndex={-1}>
+                  Promo codes
+                </h3>
+                <p role="status">
+                  {availableCount}{" "}
+                  {availableCount === 1 ? "promo is" : "promos are"} available.
+                </p>
                 <p>
                   Choose an available promo. After you send it, Goove replaces
                   it with a fresh code for the next customer.
@@ -618,17 +679,25 @@ function Rewards({ catalog }) {
                 <button
                   className="secondary small"
                   disabled={busy}
-                  onClick={refreshCodes}
+                  onClick={() => verify()}
                 >
                   {busy ? "CHECKING…" : "REFRESH AVAILABLE PROMO CODES"}
                 </button>
                 <div className="code-grid">
-                  {state.codes?.map((c) => (
-                    <article className="code-card" key={c.id}>
+                  {state.codes?.map((c, index) => (
+                    <article
+                      className={`code-card${c.status === "available" ? "" : " is-reserved"}`}
+                      key={c.id}
+                    >
                       <Gift size={25} weight="light" />
+                      <span>
+                        Promo {index + 1} ·{" "}
+                        {c.status === "available" ? "Available" : "Unavailable"}
+                      </span>
                       <strong>{c.code}</strong>
                       <button
                         disabled={busy || c.status !== "available"}
+                        aria-label={`Select promo ${index + 1}`}
                         onClick={() => {
                           setChoice(c);
                           setName("");
@@ -636,7 +705,9 @@ function Rewards({ catalog }) {
                           setError("");
                         }}
                       >
-                        SEND THIS CODE <WhatsappLogo size={18} />
+                        {c.status === "available"
+                          ? "SELECT PROMO"
+                          : "UNAVAILABLE"}
                       </button>
                     </article>
                   ))}
@@ -654,9 +725,18 @@ function Rewards({ catalog }) {
               </>
             )}
             {error && (
-              <p className="error" role="alert">
+              <p className="error" role="alert" id="reward-error">
                 {error}
               </p>
+            )}
+            {state && (
+              <button
+                className="quiet change-access"
+                disabled={busy}
+                onClick={changeAccess}
+              >
+                Use a different access code
+              </button>
             )}
             <p className="privacy-note">
               <LockSimple size={15} /> Each access code can select one promo
@@ -670,7 +750,11 @@ function Rewards({ catalog }) {
           title="Send your promo code"
           onClose={() => !busy && setChoice(null)}
         >
-          <form className="promo-contact-form" onSubmit={sendPromo}>
+          <form
+            className="promo-contact-form"
+            onSubmit={sendPromo}
+            aria-busy={busy}
+          >
             <p>
               Enter your details for the WhatsApp message. Goove will not save
               this information on the website.
@@ -678,25 +762,34 @@ function Rewards({ catalog }) {
             <label htmlFor="promo-name">Name</label>
             <input
               id="promo-name"
+              name="customer_name"
+              autoFocus
               autoComplete="name"
               minLength={2}
               maxLength={100}
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                e.target.setCustomValidity("");
+                setName(e.target.value);
+              }}
             />
             <label htmlFor="promo-phone">Phone number</label>
             <input
               id="promo-phone"
+              name="customer_phone"
               type="tel"
               autoComplete="tel"
               inputMode="tel"
-              pattern="[+0-9() .-]{7,30}"
+              pattern={phonePattern}
               title="Enter a valid phone number"
               maxLength={30}
               required
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                e.target.setCustomValidity("");
+                setPhone(e.target.value);
+              }}
             />
             <p className="fine">
               Selected promo code: <strong>{choice.code}</strong>

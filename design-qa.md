@@ -13,7 +13,7 @@ Selected direction: option 1, warm editorial handbag gallery with an ivory palet
 
 The implementation follows the chosen reference’s editorial headline, split hero, centered collection introduction, and image-led handbag cards. The requested green and gray palette now uses forest-green calls to action and cool gray-green surfaces. The Goove identity and rewards path replace the mock's generic brand and placeholder copy. On mobile, the hero stacks vertically and the six-item collection becomes a two-column grid. The hero headline was reduced at the 600 px breakpoint to leave comfortable horizontal space on narrow screens.
 
-## Interaction and service checks
+## Earlier interaction and service checks
 
 - Collection and Gifts & Rewards navigation were present and the rewards page rendered its gift cards, terms, and access-code form.
 - The 390 × 844 mobile viewport held the hero headline within the 375 px content width without horizontal overflow.
@@ -28,6 +28,12 @@ The implementation follows the chosen reference’s editorial headline, split he
 - Owner account signup was submitted for the invited email, and the user confirmed the email. Admin sign-in is available at `/admin`.
 - The promotion remains disabled until its owner completes the required legal review and enables it in Settings. The website does not process handbag purchases.
 
-## Build status
+## Rewards and Owner access — November 7, 2026
 
-Vite production build and all five project tests pass after the latest UI, API, and database changes. The rewards access screen was reloaded and verified in the local preview. Supabase security review showed the expected informational RLS notices because browser roles are intentionally granted no table policies; separate pre-existing Auth and helper-function warnings are recorded in the Supabase dashboard.
+- A visible action at the top of `/rewards` opens the access form and focuses its input. Pasted access codes are normalized; switching codes clears the previous on-screen selection and contact details.
+- The existing three-step styling now indicates access, promo selection, and WhatsApp. Promo cards have distinct labels, explicit availability, and a count of available options. Unavailable cards stay visible and disabled.
+- Selection and resend share one reservation handler. Native form validation rejects whitespace-only names, invalid phone characters, and phone values without 7–15 digits before making a reservation request. Customer contact details remain excluded from API requests.
+- Owner access opens the existing `/admin` page. Session restoration waits for the owner API, password visibility can be toggled, and an in-flight sign-in disables credentials and account-mode switching. Signup explains the invitation and confirmation requirements.
+- Local browser inspection at 320, 390, and 1440 px confirmed no horizontal overflow or page errors. Narrow screens show promo cards in one column with readable action labels. Reduced-motion preferences are honored when opening the reward flow.
+- Vite build, formatting, and all 29 checks passed: 11 Node/PostgreSQL checks and 18 Chromium browser tests across desktop and mobile dimensions. Dependency audit reported zero known vulnerabilities.
+- Authentication and reservation mutations were tested with simulated accounts and mocked services. No real owner credentials were used and no customer reservations were created for this verification.

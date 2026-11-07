@@ -5,6 +5,7 @@ import { DownloadSimple } from "@phosphor-icons/react/dist/csr/DownloadSimple";
 import { Plus } from "@phosphor-icons/react/dist/csr/Plus";
 import { Trash } from "@phosphor-icons/react/dist/csr/Trash";
 import { UploadSimple } from "@phosphor-icons/react/dist/csr/UploadSimple";
+import { SpinnerGap } from "@phosphor-icons/react/dist/csr/SpinnerGap";
 import { formatPromoActiveAt } from "./dateTime";
 const money = (value) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -16,6 +17,8 @@ export function Admin({ onCatalogChange }) {
     [tab, setTab] = useState("Claims"),
     [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
+    [showPassword, setShowPassword] = useState(false),
+    [checkingSession, setCheckingSession] = useState(Boolean(supabase)),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState(""),
@@ -52,6 +55,7 @@ export function Admin({ onCatalogChange }) {
   useEffect(() => {
     if (!supabase) return;
     let active = true;
+    const version = sessionVersion.current;
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
@@ -64,18 +68,22 @@ export function Admin({ onCatalogChange }) {
         setHistoryResult(null);
         setHistoryCode("");
         setPassword("");
+        setShowPassword(false);
         setNotice("");
       }
     });
     supabase.auth
       .getSession()
-      .then(({ data, error }) => {
-        if (!active) return;
-        if (error) setError(error.message);
-        else if (data.session)
-          refresh().catch((e) => active && setError(e.message));
+      .then(async ({ data, error }) => {
+        if (!active || version !== sessionVersion.current) return;
+        if (error) throw error;
+        if (data.session) await refresh(version);
       })
-      .catch((e) => active && setError(e.message));
+      .catch(
+        (e) =>
+          active && version === sessionVersion.current && setError(e.message),
+      )
+      .finally(() => active && setCheckingSession(false));
     return () => {
       active = false;
       sessionVersion.current += 1;
@@ -84,8 +92,10 @@ export function Admin({ onCatalogChange }) {
   }, []);
   async function login(e) {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       if (!supabase)
         throw Error(
@@ -93,7 +103,7 @@ export function Admin({ onCatalogChange }) {
         );
       if (signup) {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: email.trim(),
           password,
           options: { emailRedirectTo: window.location.origin },
         });
@@ -103,15 +113,29 @@ export function Admin({ onCatalogChange }) {
         );
         setSignup(false);
         setPassword("");
+        setShowPassword(false);
         return;
       }
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
       if (error) throw error;
       await refresh();
       setPassword("");
+      setShowPassword(false);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function signOut() {
+    setBusy(true);
+    setError("");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
     } catch (e) {
       setError(e.message);
     } finally {
@@ -175,12 +199,34 @@ export function Admin({ onCatalogChange }) {
   const promotionsWithoutCode = data?.gifts.filter(
     (g) => g.active && !data.reward_codes.some((c) => c.gift_type_id === g.id),
   );
+  if (checkingSession)
+    return (
+      <p className="owner-session" role="status">
+        <SpinnerGap className="spin" aria-hidden="true" /> Checking your owner
+        session…
+      </p>
+    );
   if (!data)
     return (
       <div className="admin-login">
-        <p className="eyebrow">OWNER ACCESS</p>
-        <p>Sign in to manage your collection and customer rewards.</p>
-        <form onSubmit={login}>
+        <h2 className="owner-login-title">
+          {signup ? "Set up owner access" : "Welcome back"}
+        </h2>
+        <p>
+          {signup
+            ? "Create your invited owner account."
+            : "Sign in to manage your collection and customer rewards."}
+        </p>
+        <p className="fine" id="owner-help">
+          {signup
+            ? "Use the email address invited by Goove, then confirm it before signing in."
+            : "For invited owners only. Customer reward access codes are entered on Gifts & Rewards."}
+        </p>
+        <form
+          onSubmit={login}
+          aria-busy={busy}
+          aria-describedby={error ? "owner-help owner-error" : "owner-help"}
+        >
           <label htmlFor="owner-email">Email address</label>
           <input
             id="owner-email"
@@ -189,20 +235,35 @@ export function Admin({ onCatalogChange }) {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="username"
+            disabled={busy}
+            autoCapitalize="none"
+            spellCheck="false"
           />
           <label htmlFor="owner-password">Password</label>
           <input
             id="owner-password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={signup ? 8 : 1}
             autoComplete={signup ? "new-password" : "current-password"}
+            disabled={busy}
           />
-          <button disabled={busy}>
+          <label className="checkbox owner-show-password">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(e) => setShowPassword(e.target.checked)}
+              disabled={busy}
+            />{" "}
+            Show password
+          </label>
+          <button disabled={busy || !configured}>
             {busy
-              ? "PLEASE WAIT…"
+              ? signup
+                ? "CREATING ACCOUNT…"
+                : "SIGNING IN…"
               : signup
                 ? "CREATE OWNER ACCOUNT"
                 : "SIGN IN"}
@@ -210,9 +271,13 @@ export function Admin({ onCatalogChange }) {
         </form>
         <button
           className="quiet"
+          disabled={busy || !configured}
           onClick={() => {
             setSignup(!signup);
             setError("");
+            setNotice("");
+            setPassword("");
+            setShowPassword(false);
           }}
         >
           {signup
@@ -228,7 +293,7 @@ export function Admin({ onCatalogChange }) {
           <p className="fine">Owner access is awaiting secure setup.</p>
         )}
         {error && (
-          <p role="alert" className="error">
+          <p role="alert" className="error" id="owner-error">
             {error}
           </p>
         )}
@@ -238,13 +303,7 @@ export function Admin({ onCatalogChange }) {
     <div className="admin">
       <div className="admin-toolbar">
         <p>Your private collection studio.</p>
-        <button
-          className="quiet"
-          onClick={async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) setError(error.message);
-          }}
-        >
+        <button className="quiet" onClick={signOut} disabled={busy}>
           <SignOut /> Sign out
         </button>
       </div>

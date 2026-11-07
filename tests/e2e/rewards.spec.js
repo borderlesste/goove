@@ -109,8 +109,13 @@ async function choosePromo(page) {
     .getByLabel("Access code", { exact: true })
     .fill("GOOVE-" + "A".repeat(48));
   await page.getByRole("button", { name: "VIEW MY PROMO CODES" }).click();
-  const buttons = page.getByRole("button", { name: "SEND THIS CODE" });
+  const buttons = page.getByRole("button", { name: /^Select promo / });
   await expect(buttons.nth(1)).toBeDisabled();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
   await buttons.first().click();
   const dialog = page.getByRole("dialog", { name: "Send your promo code" });
   await expect(dialog).toBeVisible();
@@ -134,6 +139,193 @@ test("owner sign-in remains reachable when the public catalog fails", async ({
   await expect(
     page.getByRole("heading", { name: "Goove Studio" }),
   ).toBeVisible();
+});
+
+test("the first rewards action focuses access and lets customers switch codes", async ({
+  page,
+}) => {
+  const verified = [];
+  await page.route("**/functions/v1/goove-api", (route) => {
+    const body = route.request().postDataJSON();
+    if (body.action === "catalog") return route.fulfill({ json: catalog });
+    verified.push(body);
+    return route.fulfill({
+      json: {
+        codes: [{ id: rewardId, code: "GIFT-••••••••", status: "available" }],
+      },
+    });
+  });
+  await page.goto("/rewards");
+  await page
+    .getByRole("button", { name: "ENTER ACCESS CODE", exact: true })
+    .click();
+  const access = page.getByLabel("Access code", { exact: true });
+  await expect(access).toBeFocused();
+  await access.fill("  goove-" + "a".repeat(48) + "  ");
+  await expect(access).toHaveValue("GOOVE-" + "A".repeat(48));
+  await page.getByRole("button", { name: "VIEW MY PROMO CODES" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Promo codes" }),
+  ).toBeFocused();
+  await expect(page.getByRole("status")).toHaveText("1 promo is available.");
+  expect(verified).toEqual([
+    { action: "verify", access_code: "GOOVE-" + "A".repeat(48) },
+  ]);
+  await page
+    .getByRole("button", { name: "Use a different access code" })
+    .click();
+  await expect(access).toHaveValue("");
+  await expect(access).toBeFocused();
+  await expect(
+    page
+      .getByRole("list", { name: "Reward progress" })
+      .locator('[aria-current="step"]'),
+  ).toHaveText("1Access code");
+});
+
+test("contact validation rejects blank names and phones without digits before reserving", async ({
+  page,
+}) => {
+  let reservations = 0;
+  await mockApi(page, (route) => {
+    reservations += 1;
+    return route.fulfill({ json: { claim } });
+  });
+  const dialog = await choosePromo(page);
+  const name = dialog.getByLabel("Name", { exact: true });
+  const phone = dialog.getByLabel("Phone number", { exact: true });
+  const submit = dialog.getByRole("button", { name: "CONTINUE TO WHATSAPP" });
+  await name.fill("  ");
+  await submit.click();
+  await expect(name).toBeFocused();
+  expect(await name.evaluate((input) => input.validationMessage)).toContain(
+    "at least two characters",
+  );
+  await name.fill("Test Customer");
+  await phone.fill("-------");
+  await submit.click();
+  await expect(phone).toBeFocused();
+  expect(await phone.evaluate((input) => input.validationMessage)).toContain(
+    "7 to 15 digits",
+  );
+  expect(reservations).toBe(0);
+  await phone.fill("letters!");
+  expect(await phone.evaluate((input) => input.checkValidity())).toBe(false);
+  await phone.fill("(717) 555-0100");
+  expect(await phone.evaluate((input) => input.checkValidity())).toBe(true);
+});
+
+test("Owner access opens the studio and protects an in-flight sign-in", async ({
+  page,
+}) => {
+  let finish;
+  let started;
+  const requested = new Promise((resolve) => {
+    started = resolve;
+  });
+  const ready = new Promise((resolve) => {
+    finish = resolve;
+  });
+  await mockApi(page, (route) => route.fulfill({ json: {} }));
+  await page.route("**/auth/v1/token?*", async (route) => {
+    started(route.request().postDataJSON());
+    await ready;
+    return route.fulfill({
+      status: 400,
+      json: {
+        error_code: "invalid_credentials",
+        msg: "Invalid login credentials",
+      },
+    });
+  });
+  await page.goto("/rewards");
+  await page.getByRole("link", { name: "Owner access", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  const password = page.getByLabel("Password", { exact: true });
+  await page.getByLabel("Email address").fill("owner@example.test");
+  await password.fill("test-password-only");
+  await page.getByRole("checkbox", { name: "Show password" }).check();
+  await expect(password).toHaveAttribute("type", "text");
+  const setup = page.getByRole("button", {
+    name: "First time? Set up your owner account",
+  });
+  await page.getByRole("button", { name: "SIGN IN", exact: true }).click();
+  const body = await requested;
+  expect(body.email).toBe("owner@example.test");
+  await expect(password).toBeDisabled();
+  await expect(setup).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "SIGNING IN…", exact: true }),
+  ).toBeDisabled();
+  finish();
+  await expect(page.getByRole("alert")).toHaveText("Invalid login credentials");
+  await expect(password).toBeEnabled();
+  await setup.click();
+  await expect(
+    page.getByRole("heading", { name: "Set up owner access" }),
+  ).toBeVisible();
+  await expect(password).toHaveValue("");
+  await expect(password).toHaveAttribute("type", "password");
+  await expect(page.getByRole("alert")).toHaveCount(0);
+});
+
+test("an existing owner session stays in a loading state until the server authorizes it", async ({
+  page,
+}) => {
+  const user = {
+    id: "33333333-3333-4333-8333-333333333333",
+    email: "owner@example.test",
+  };
+  const expiresAt = Math.floor(Date.now() / 1000) + 3600;
+  const token = [
+    Buffer.from('{"alg":"HS256","typ":"JWT"}').toString("base64url"),
+    Buffer.from(JSON.stringify({ sub: user.id, exp: expiresAt })).toString(
+      "base64url",
+    ),
+    "test-signature",
+  ].join(".");
+  await page.addInitScript(
+    (session) =>
+      localStorage.setItem("sb-goove-test-auth-token", JSON.stringify(session)),
+    {
+      access_token: token,
+      refresh_token: "test-refresh",
+      expires_at: expiresAt,
+      expires_in: 3600,
+      token_type: "bearer",
+      user,
+    },
+  );
+  let finish;
+  let started;
+  const requested = new Promise((resolve) => {
+    started = resolve;
+  });
+  const ready = new Promise((resolve) => {
+    finish = resolve;
+  });
+  await mockApi(page, async (route, body) => {
+    expect(body.action).toBe("admin_list");
+    started();
+    await ready;
+    return route.fulfill({
+      json: { ...catalog, claims: [], reward_codes: [], access_codes: [] },
+    });
+  });
+  await page.goto("/admin");
+  await requested;
+  await expect(page.getByRole("status")).toHaveText(
+    "Checking your owner session…",
+  );
+  await expect(page.getByLabel("Email address")).toHaveCount(0);
+  await expect(
+    page.getByRole("tab", { name: "Claims", exact: true }),
+  ).toHaveCount(0);
+  finish();
+  await expect(
+    page.getByRole("tab", { name: "Claims", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("status")).toHaveCount(0);
 });
 
 test("reservation failures are visible inside the dialog", async ({ page }) => {

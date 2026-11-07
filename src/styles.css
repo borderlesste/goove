@@ -975,7 +975,7 @@ form h3 {
     height: 21px;
   }
   .code-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
   .reward-flow h3 {
     font-size: 29px;
@@ -1294,6 +1294,51 @@ button:hover,
 }
 .owner-page .admin-login {
   margin: 0 auto;
+}
+.owner-login-title {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+.owner-session {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+}
+.owner-show-password {
+  min-height: 44px;
+  align-items: center;
+  margin-bottom: 0;
+}
+.rewards-start {
+  margin-top: 24px;
+}
+.reward-section {
+  scroll-margin-top: 24px;
+}
+.change-access {
+  margin-top: 22px;
+}
+.code-card:has(button:disabled) {
+  cursor: default;
+}
+.code-card.is-reserved button {
+  cursor: not-allowed;
+}
+.reward-flow .steps li {
+  font-size: 13px;
+}
+.code-card > span {
+  font-size: 14px;
+}
+.reward-flow .code-card button {
+  font-size: 13px;
+  padding: 12px;
+  letter-spacing: 1px;
+}
+.steps li > span {
+  flex-shrink: 0;
 }
 
 .promo-contact-form {
