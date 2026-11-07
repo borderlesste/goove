@@ -348,6 +348,16 @@ Deno.serve(async (req) => {
         throw Error("Add between 1 and 3 uploaded photos for each item.");
       if (saveGallery) item.image_url = photos[0];
       if (body.table === "handbags") {
+        if (i.specifications !== undefined) {
+          if (
+            typeof i.specifications !== "string" ||
+            i.specifications.length > 1500
+          )
+            throw Error(
+              "Specifications must be text with at most 1500 characters.",
+            );
+          item.specifications = i.specifications.trim();
+        }
         const price =
           i.price === "" || i.price == null ? null : Number(i.price);
         if (price === null || !Number.isFinite(price) || price <= 0)

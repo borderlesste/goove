@@ -36,6 +36,20 @@ reward lifecycle and request validation tests, then runs Chromium tests at deskt
 and mobile sizes. Browser tests mock Supabase and WhatsApp and never create real
 reservations. CI runs these checks on every push to `main`.
 
+## Storefront
+
+The hero uses Playfair Display with Inter body text and Cinzel accents. The
+collection keeps equal-height cards and aligned purchase actions, including when
+descriptions expand. Selecting a product image opens an accessible Quick View
+with the original gallery photos, full description, availability, and price.
+
+Owners can add verified specifications under **Admin → Handbags → Edit →
+Specifications** (up to 1,500 characters). Empty specifications show a contact
+prompt instead of fabricated materials or dimensions. WhatsApp inquiries from
+cards and Quick View include the canonical bag permalink and the direct image
+URL of the selected gallery photo. WhatsApp receives image links in the inquiry
+text; the website does not upload attachments or send messages automatically.
+
 ## Vercel
 
 `vercel.json` installs with `npm ci`, builds with `npm run build`, publishes

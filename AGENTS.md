@@ -13,6 +13,16 @@ Email confirmation must return to `https://goove.vercel.app/`. Keep signup's
 `emailRedirectTo`, Supabase Auth Site URL, and the exact redirect allowlist aligned.
 Show success only after a confirmed identity is verified by Supabase Auth.
 
+Storefront design: use a spacious split hero with text on the left and proportional
+photography on the right; stack on mobile. Heading: “Elevate Your Elegance”.
+Subtitle: “Luxury Women's Handbags with Exclusive Matching Gift”. Use Playfair
+Display headings, Inter body text, and restrained Cinzel accents. Keep product
+cards equal height with purchase actions aligned, expandable descriptions, and
+image-triggered accessible Quick View. Promotions belong in normal page flow,
+never over product content. WhatsApp inquiries must include the canonical product
+link and the direct URL of the exact photo currently selected. Show only verified
+owner-entered specifications; never invent materials or dimensions.
+
 ## Development tools
 
 Ponytail, ECC, and Agency Agents are installed as project-local skills in

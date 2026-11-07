@@ -89,10 +89,9 @@ export const defaultSettings = {
   promotion_mode: "hidden",
   promotion_enabled: false,
   legal_reviewed: false,
-  hero_heading: "Everyday,\nexceptionally.",
-  hero_description:
-    "Beautiful handbags for a more considered life — and exclusive rewards for the journey with you.",
-  hero_cta_text: "VIEW GIFTS & REWARDS",
+  hero_heading: "Elevate Your Elegance",
+  hero_description: "Luxury Women's Handbags with Exclusive Matching Gift",
+  hero_cta_text: "SHOP THE COLLECTION",
   hero_image_url: "/images/hero.webp",
   promo_banner_text: "Buy any bag and unlock a special Goove promo.",
 };
@@ -133,9 +132,9 @@ export function whatsappUrl(number, name, code) {
   if (!/^\d{8,15}$/.test(number || "")) return null;
   return `https://wa.me/${number}?text=${encodeURIComponent(`Hello! My name is ${name}.\n\nI recently purchased a handbag from your collection.\n\nMy selected reward code is ${code}.\n\nI would like to submit my reward code for verification.\n\nThank you!`)}`;
 }
-export function whatsappBagUrl(number, name, itemUrl) {
+export function whatsappBagUrl(number, name, itemUrl, imageUrl) {
   if (!/^\d{8,15}$/.test(number || "")) return null;
-  return `https://wa.me/${number}?text=${encodeURIComponent(`Hello Goove! I would like to buy ${name}.\n\nHere is the bag I am interested in: ${itemUrl}\n\nPlease let me know how to order. Thank you!`)}`;
+  return `https://wa.me/${number}?text=${encodeURIComponent(`Hello Goove! I would like to buy ${name}.\n\nSelected product: ${itemUrl}\n\nProduct photo: ${imageUrl}\n\nPlease let me know how to order. Thank you!`)}`;
 }
 export function whatsappPromoUrl(number, code, name, phone, selectedAt) {
   if (!/^\d{8,15}$/.test(number || "")) return null;

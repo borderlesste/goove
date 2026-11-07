@@ -1,57 +1,23 @@
-import React, { useEffect, useId, useRef, useState } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { ArrowLeft } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { Check } from "@phosphor-icons/react/dist/csr/Check";
 import { LockSimple } from "@phosphor-icons/react/dist/csr/LockSimple";
 import { Gift } from "@phosphor-icons/react/dist/csr/Gift";
 import { WhatsappLogo } from "@phosphor-icons/react/dist/csr/WhatsappLogo";
-import { X } from "@phosphor-icons/react/dist/csr/X";
 import { SpinnerGap } from "@phosphor-icons/react/dist/csr/SpinnerGap";
 import {
   callApi,
   loadCatalog,
   defaultSettings,
-  whatsappBagUrl,
   whatsappPromoUrl,
   emailConfirmation,
 } from "./api";
-import { Admin } from "./Admin";
-const money = (value) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-    Number(value),
-  );
-export function Modal({ title, onClose, children }) {
-  const ref = useRef();
-  const titleId = useId();
-  useEffect(() => {
-    const prior = document.activeElement;
-    const dialog = ref.current;
-    if (!dialog.open) dialog.showModal();
-    return () => {
-      dialog.close();
-      prior?.focus();
-    };
-  }, []);
-  return (
-    <dialog
-      ref={ref}
-      aria-labelledby={titleId}
-      onCancel={(e) => {
-        e.preventDefault();
-        onClose();
-      }}
-      onClick={(e) => {
-        if (e.target === ref.current) onClose();
-      }}
-    >
-      <button className="close" aria-label="Close dialog" onClick={onClose}>
-        <X size={22} />
-      </button>
-      <h2 id={titleId}>{title}</h2>
-      {children}
-    </dialog>
-  );
-}
+import { Modal } from "./Modal";
+import { ProductCard } from "./ProductCard";
+const Admin = lazy(() =>
+  import("./Admin").then((module) => ({ default: module.Admin })),
+);
 export function App() {
   const [path, setPath] = useState(location.pathname),
     [catalog, setCatalog] = useState({
@@ -93,6 +59,16 @@ export function App() {
   };
   const rewards = path === "/rewards",
     adminPage = path === "/admin";
+  useEffect(() => {
+    if (path !== "/" || loading || !location.hash.startsWith("#bag-")) return;
+    try {
+      document
+        .getElementById(decodeURIComponent(location.hash.slice(1)))
+        ?.scrollIntoView({ block: "center" });
+    } catch {
+      /* Ignore malformed fragments from external links. */
+    }
+  }, [path, loading, catalog.handbags]);
   useEffect(() => {
     document.title = `${rewards ? "Exclusive Gifts & Rewards" : adminPage ? "Goove Studio" : "Handbag Collection"} | ${catalog.settings.business_name}`;
   }, [path, catalog.settings.business_name]);
@@ -151,7 +127,15 @@ export function App() {
             </a>
             <p className="eyebrow">OWNER ACCESS</p>
             <h1>Goove Studio</h1>
-            <Admin onCatalogChange={refresh} />
+            <Suspense
+              fallback={
+                <p className="owner-session" role="status">
+                  Opening Goove Studio…
+                </p>
+              }
+            >
+              <Admin onCatalogChange={refresh} />
+            </Suspense>
           </section>
         ) : error ? (
           <section className="empty">
@@ -167,16 +151,20 @@ export function App() {
           <Rewards catalog={catalog} />
         ) : (
           <>
-            <section className="hero">
+            <section className="hero" aria-labelledby="hero-heading">
               <div className="hero-copy">
-                <h1>{catalog.settings.hero_heading}</h1>
-                <p>{catalog.settings.hero_description}</p>
-                <a
-                  className="button"
-                  href="/rewards"
-                  onClick={(e) => navigate(e, "/rewards")}
-                >
-                  {catalog.settings.hero_cta_text}{" "}
+                <p className="eyebrow">THE GOOVE COLLECTION</p>
+                <h1 id="hero-heading">
+                  {catalog.settings.hero_heading ||
+                    defaultSettings.hero_heading}
+                </h1>
+                <p className="hero-subtitle">
+                  {catalog.settings.hero_description ||
+                    defaultSettings.hero_description}
+                </p>
+                <a className="button" href="#collection">
+                  {catalog.settings.hero_cta_text ||
+                    defaultSettings.hero_cta_text}{" "}
                   <ArrowRight size={22} weight="light" />
                 </a>
               </div>
@@ -187,48 +175,26 @@ export function App() {
                 fetchPriority="high"
               />
             </section>
-            <section className="collection section-wrap">
+            <section
+              className="collection section-wrap"
+              id="collection"
+              aria-labelledby="collection-heading"
+            >
               <div className="section-heading">
                 <p className="eyebrow">THE COLLECTION</p>
-                <h2>Handbags for every chapter.</h2>
+                <h2 id="collection-heading">Handbags for every chapter.</h2>
                 <p>
                   Timeless style, distinctive character, and a little more to
                   look forward to.
                 </p>
               </div>
               <div className="bag-grid">
-                {catalog.handbags.map((b) => (
-                  <article className="bag" id={`bag-${b.id}`} key={b.id}>
-                    <BagGallery bag={b} />
-                    <h3>{b.name}</h3>
-                    <p>{b.description}</p>
-                    {Number(b.price) > 0 && (
-                      <p className="bag-price">{money(b.price)}</p>
-                    )}
-                    {b.in_stock === false ? (
-                      <p className="stock-status" role="status">
-                        OUT OF STOCK
-                      </p>
-                    ) : (
-                      <>
-                        <a
-                          className="button buy-button"
-                          href={whatsappBagUrl(
-                            catalog.settings.whatsapp_number,
-                            b.name,
-                            `${location.origin}/#bag-${encodeURIComponent(b.id)}`,
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <WhatsappLogo size={20} /> BUY THIS BAG
-                        </a>
-                        <p className="buy-hint">
-                          Send us this bag’s link on WhatsApp to order.
-                        </p>
-                      </>
-                    )}
-                  </article>
+                {catalog.handbags.map((bag) => (
+                  <ProductCard
+                    key={bag.id}
+                    bag={bag}
+                    phone={catalog.settings.whatsapp_number}
+                  />
                 ))}
               </div>
               {!catalog.handbags.length && (
@@ -313,62 +279,6 @@ export function App() {
         </footer>
       )}
     </>
-  );
-}
-function BagGallery({ bag }) {
-  const photos = (
-    bag.gallery_images?.length ? bag.gallery_images : [bag.image_url]
-  ).filter(Boolean);
-  const [index, setIndex] = useState(0);
-  useEffect(() => setIndex(0), [bag.id, photos.length]);
-  return (
-    <div className="bag-gallery">
-      <div className="bag-photo">
-        <img
-          src={photos[index]}
-          alt={`${bag.name}, photo ${index + 1} of ${photos.length}`}
-          loading="lazy"
-          width="1024"
-          height="960"
-        />
-        {photos.length > 1 && (
-          <>
-            <button
-              className="gallery-arrow previous"
-              aria-label={`Previous ${bag.name} photo`}
-              onClick={() =>
-                setIndex((i) => (i - 1 + photos.length) % photos.length)
-              }
-            >
-              <ArrowLeft size={18} />
-            </button>
-            <button
-              className="gallery-arrow next"
-              aria-label={`Next ${bag.name} photo`}
-              onClick={() => setIndex((i) => (i + 1) % photos.length)}
-            >
-              <ArrowRight size={18} />
-            </button>
-          </>
-        )}
-      </div>
-      {photos.length > 1 && (
-        <div
-          className="gallery-dots"
-          aria-label={`${photos.length} photos of ${bag.name}`}
-        >
-          {photos.map((_, i) => (
-            <button
-              key={i}
-              className={index === i ? "active" : ""}
-              aria-label={`Show photo ${i + 1} of ${bag.name}`}
-              aria-pressed={index === i}
-              onClick={() => setIndex(i)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
   );
 }
 function GiftGallery({ gift }) {

@@ -852,6 +852,18 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
         />
       </label>
       <>
+        {type === "Handbags" && (
+          <label>
+            Specifications (optional)
+            <textarea
+              maxLength={1500}
+              rows={5}
+              value={draft.specifications || ""}
+              onChange={(e) => set("specifications", e.target.value)}
+              placeholder="Material, dimensions, strap details, and care instructions. Include verified product details only."
+            />
+          </label>
+        )}
         <label>
           <UploadSimple /> Upload gallery photos (choose 1–3)
           <input
