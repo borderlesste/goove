@@ -13,7 +13,9 @@
     "test:e2e": "playwright test",
     "format": "prettier --write src supabase/functions tests/e2e playwright.config.js vercel.json",
     "format:check": "prettier --check src supabase/functions tests/e2e playwright.config.js vercel.json",
-    "check": "npm run format:check && npm test && npm run test:e2e"
+    "check": "npm run tools:check && npm run format:check && npm test && npm run test:e2e",
+    "tools:setup": "node scripts/setup-dev-tools.mjs",
+    "tools:check": "node scripts/setup-dev-tools.mjs --check"
   },
   "dependencies": {
     "@phosphor-icons/react": "2.1.10",

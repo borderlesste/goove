@@ -3,6 +3,10 @@
 React storefront and owner studio, built with Vite and backed by Supabase Auth,
 Postgres, Storage, and the `goove-api` Edge Function.
 
+Development assistance: [Ponytail, ECC, and Agency Agents](docs/dev-tools/README.md)
+are installed as project-local skills and Codex profiles, with pinned source
+revisions and an offline integrity check.
+
 ## Development
 
 Use Node 24 and npm (the committed `package-lock.json` is the dependency source

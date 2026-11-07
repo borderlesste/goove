@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "ponytail",
+      "revision": "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846"
+    },
+    {
+      "id": "ecc",
+      "revision": "d3b8a3e908904e242ed2dbe66af62cca71131419"
+    },
+    {
+      "id": "agency-agents",
+      "revision": "479193dcce1cf6432ce0f5aa230ab8cc739a8c6b"
+    }
+  ],
+  "files": {
+    ".agents/skills/agency-accessibility-auditor/SKILL.md": "5d11a5914e2f3bc68887d2cde67aeca05bea7f71da8d6e4020a4dbd89de96ee5",
+    ".agents/skills/agency-api-tester/SKILL.md": "d94b64eb4969d641b4a398baa4631fc7fe58838303af0ae7cb18dfea20da1380",
+    ".agents/skills/agency-application-security-engineer/SKILL.md": "23465660fca1de9c2e0487ab554eb5f9503e8d500efbedbfc37890ec83386ec5",
+    ".agents/skills/agency-backend-architect/SKILL.md": "dad9c48d1f378d5a4814d0f21eb5de072ab9b347831b28fbb46d8510175203a3",
+    ".agents/skills/agency-code-reviewer/SKILL.md": "ecb71253b1094ac6a2315cc8a790189cda60ed9ba2f7334b26b0dea78d2ae240",
+    ".agents/skills/agency-database-optimizer/SKILL.md": "fcce3166b01ab13b026e715d66403f354af1b54d6cd29e01a1b688e0ebd1ca35",
+    ".agents/skills/agency-devops-automator/SKILL.md": "15e2ad60d415be9f1082707fbc5f9809bec0ad6adefb112ccc368ab7ee0ae969",
+    ".agents/skills/agency-frontend-developer/SKILL.md": "5ba5a3fda13d7ec8def51cfbb29c71d8792164c6d47091d66fcf64d90b55bc71",
+    ".agents/skills/agency-test-automation-engineer/SKILL.md": "c9377bbdca9d8f142b7b3a88f0adbedbbf1b1fb14a954b99c9daedbc1eee47a1",
+    ".agents/skills/api-design/SKILL.md": "bfae53167acc91caff0ff9ab73a80ee3fd92caccdfa445c88302c3bf95255156",
+    ".agents/skills/backend-patterns/SKILL.md": "9b983d0297a983110fdfda8dce55d19b750ca3e53ef155d75a3eff740d3874b8",
+    ".agents/skills/coding-standards/SKILL.md": "e80544c3d1eac5b14f22022146bd91a6b0ecc30e099cf5181894853aeb81dee1",
+    ".agents/skills/database-migrations/SKILL.md": "dad2f1964295eee14a96e06213ce3f60992bbcdc1f37a50c828bbc2e1abd79dd",
+    ".agents/skills/deployment-patterns/SKILL.md": "b864abd1954570c4a469b7e1deb897e57858d25db2fd98d035ff7bca4a15b9b6",
+    ".agents/skills/e2e-testing/SKILL.md": "b0e00e7e17cb259101139900816c5528aed18dd10bcf5f9cb42cfc35baf8a755",
+    ".agents/skills/frontend-a11y/SKILL.md": "e00991a3f4d47fcf1529dd74a080afcf46137dc5061e70dc6e3da7b27f2ae3f3",
+    ".agents/skills/frontend-patterns/SKILL.md": "a5b971eb9e74cd763c7e3308bfd888e0d9cf69f8b88477659889d77182479740",
+    ".agents/skills/ponytail-audit/SKILL.md": "2b3223a02c386d1263e1b08343cb8eb3a53e444cdafb1d79e26c8ec2a8fcad28",
+    ".agents/skills/ponytail-debt/SKILL.md": "b5ec2762f6ba8c4af9ea7173aa6c9f91b88655a25e43f9de0264f6ce8722b25f",
+    ".agents/skills/ponytail-gain/SKILL.md": "231034a896d6762e4b5c8468287083422c56b499119976ec9f76821f7d083090",
+    ".agents/skills/ponytail-help/SKILL.md": "86ab0ce0af70cbeeeef499d5c884873b393f87f86401dcc45553662ce2c1eff9",
+    ".agents/skills/ponytail-review/SKILL.md": "33fe4ebe22a460924e5d4a261e223df22e409cc94ab76182bee9fb91a3ef022e",
+    ".agents/skills/ponytail/SKILL.md": "9badd22a32e19cb884e46dfa8d3aae82bb81dfa5484105b8b4f0262df823a509",
+    ".agents/skills/security-review/cloud-infrastructure-security.md": "7d9a83852475a9396e04c59c73df84ac24ee0f41322016de7c11c62138c2a8ca",
+    ".agents/skills/security-review/SKILL.md": "b9eb6416eebc8dda046674f0a2dbb3be88aff526d182b60a0f55998d3d6d0d8d",
+    ".agents/skills/tdd-workflow/SKILL.md": "8887afa786ef30de834e7567115d3df71934b343c3d9d849714f8ea43f979ee0",
+    ".agents/skills/verification-loop/SKILL.md": "503aebee7d414f559c4874600081a40b1e7aea269b58073c5c9660c6641b00a0",
+    ".codex/agents/accessibility-auditor.toml": "093dd07b2045d6899dd11e4b166784f84a3f1dd27009b625069646613f6df542",
+    ".codex/agents/api-tester.toml": "9e6e5addf754b2740b4bc8e4c87f01f245ce5f2e4150fc4a1d9b0e22c4646045",
+    ".codex/agents/application-security-engineer.toml": "90a79524fd7b0a6448c4f56a86cc5e28788138f406f63d66a8bb58fc99c3aa26",
+    ".codex/agents/backend-architect.toml": "0079dc054384e437620c838fe29571f1e7550da2fd37abacf37486a251b8a93f",
+    ".codex/agents/code-reviewer.toml": "40e32a1188bb51af8bc5bdfa69341510e8f9c2d331d3ed6b53f25b71c052eeaf",
+    ".codex/agents/database-optimizer.toml": "b6719825e0cdc3f45f5783b3dfb7bb604c1d532135b31a2a62b398804617f122",
+    ".codex/agents/devops-automator.toml": "3e8ddc7ad2c5ad58b85ba94482d2911a5e2dbc3b7ca0a96c43dab54d0fb9737b",
+    ".codex/agents/frontend-developer.toml": "774e15531ea51378b7d8cf599732571705de9754cfb4282fe0616c99fdff0f10",
+    ".codex/agents/test-automation-engineer.toml": "b4c52c74f8c6fc854e61d0561df5f7f955338b1ebf24af03d3986e734a59dad0",
+    "docs/dev-tools/licenses/agency-agents.txt": "9a45258434d5cedf0af73c9ad4771373701225038d246c49219026c33677f66f",
+    "docs/dev-tools/licenses/ecc.txt": "326146379f01bb137c0a5d3c54770c1aa31076705c8b88a7f6b26a460f6221b2",
+    "docs/dev-tools/licenses/ponytail.txt": "fb1bc6909ac3ef82d5c22106e32ef682b0cff66788fa915fb9b53b15c9d2f3ab"
+  }
+}

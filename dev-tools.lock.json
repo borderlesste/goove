@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "ponytail",
+      "repository": "https://github.com/borderlesste/ponytail.git",
+      "revision": "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846",
+      "skills": [
+        "ponytail",
+        "ponytail-review",
+        "ponytail-audit",
+        "ponytail-debt",
+        "ponytail-gain",
+        "ponytail-help"
+      ]
+    },
+    {
+      "id": "ecc",
+      "repository": "https://github.com/borderlesste/ECC.git",
+      "revision": "d3b8a3e908904e242ed2dbe66af62cca71131419",
+      "skills": [
+        "coding-standards",
+        "frontend-patterns",
+        "frontend-a11y",
+        "backend-patterns",
+        "api-design",
+        "e2e-testing",
+        "verification-loop",
+        "database-migrations",
+        "deployment-patterns",
+        "tdd-workflow",
+        "security-review"
+      ]
+    },
+    {
+      "id": "agency-agents",
+      "repository": "https://github.com/borderlesste/agency-agents.git",
+      "revision": "479193dcce1cf6432ce0f5aa230ab8cc739a8c6b",
+      "agents": [
+        "frontend-developer",
+        "backend-architect",
+        "code-reviewer",
+        "database-optimizer",
+        "devops-automator",
+        "accessibility-auditor",
+        "api-tester",
+        "application-security-engineer",
+        "test-automation-engineer"
+      ]
+    }
+  ]
+}

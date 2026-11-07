@@ -1,0 +1,2 @@
+# Preserve the official converter's output for vendored Agency profiles.
+.agents/skills/agency-*/SKILL.md whitespace=-blank-at-eol
