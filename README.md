@@ -83,9 +83,10 @@ For a real delivery check, create an account under `/admin`, open the latest
 confirmation email, and verify that the final page is the canonical root with a
 confirmation message. Continue to owner access, then test re-opening the same
 link and using **Resend confirmation email** with an unconfirmed account. Browser
-tests mock Auth and do not send email. A live invalid-token probe during the
-2026-11-07 review still fell back to the old Vercel SSO-protected alias; the hosted
-Site URL must be corrected independently of the application deployment.
+tests mock Auth and do not send email. A safe invalid-token probe should redirect
+to the canonical root with an expired-link message. Check both the default return
+and an explicit `redirect_to`; an unapproved external destination must also fall
+back to Goove. Hosted Auth URLs must be verified independently of the deployment.
 
 The first non-anonymous email account automatically receives a row in
 `public.goove_owners` through an Auth signup trigger. Its email must be confirmed
