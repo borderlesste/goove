@@ -1,0 +1,3 @@
+{
+  "tasks": { "check": "deno check goove-api/index.ts" }
+}

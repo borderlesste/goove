@@ -1,12 +1,18 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,readdir} from 'node:fs/promises';
 import {PGlite} from '@electric-sql/pglite';
 
 test('PostgreSQL reward lifecycle, permanent locks, expiry and access boundaries',async()=>{
  const db=new PGlite();
  await db.exec('create role anon; create role authenticated; create role service_role bypassrls; create schema auth; create table auth.users(id uuid primary key);');
  await db.exec(await readFile(new URL('../supabase/schema.sql',import.meta.url),'utf8'));
+ const migrationDir=new URL('../supabase/migrations/',import.meta.url);
+ for(const file of (await readdir(migrationDir)).filter(file=>file.endsWith('.sql')).sort()) {
+  const sql=await readFile(new URL(file,migrationDir),'utf8');
+  await db.exec(sql);
+  await db.exec(sql); // These incremental maintenance changes are safe to repeat.
+ }
  const q=(sql,args=[])=>db.query(sql,args);const scalar=async(sql,args)=> (await q(sql,args)).rows[0];
  await q("update goove_settings set public_phone=$1,public_email=$2,social_links=$3::jsonb",['717 655-4737','hello@goove.example','[{"label":"Instagram","url":"https://instagram.com/goove"}]']);
  const contact=await scalar('select public_phone,public_email,social_links from goove_settings where id=true');assert.equal(contact.public_phone,'717 655-4737');assert.equal(contact.public_email,'hello@goove.example');assert.equal(contact.social_links[0].label,'Instagram');
