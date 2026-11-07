@@ -44,8 +44,9 @@ descriptions expand. Selecting a product image opens an accessible Quick View
 with the original gallery photos, full description, availability, and price.
 
 Owners can add verified specifications under **Admin → Handbags → Edit →
-Specifications** (up to 1,500 characters). Empty specifications show a contact
-prompt instead of fabricated materials or dimensions. WhatsApp inquiries from
+Specifications** (up to 1,500 characters). Product descriptions can include
+materials, dimensions, and gift details; empty specifications add no contact
+prompt. WhatsApp inquiries from
 cards and Quick View include the canonical bag permalink and the direct image
 URL of the selected gallery photo. WhatsApp receives image links in the inquiry
 text; the website does not upload attachments or send messages automatically.

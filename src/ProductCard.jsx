@@ -39,9 +39,11 @@ export function ProductCard({ bag, phone }) {
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     document.fonts.ready.then(measure);
+    document.fonts.addEventListener("loadingdone", measure);
     return () => {
       active = false;
       observer.disconnect();
+      document.fonts.removeEventListener("loadingdone", measure);
     };
   }, [description, expanded]);
   const image = photos[index] || bag.image_url;
@@ -185,12 +187,7 @@ export function ProductCard({ bag, phone }) {
                 <p className="product-specification-notes">
                   {bag.specifications}
                 </p>
-              ) : (
-                <p className="product-detail-note">
-                  Ask our team for materials, dimensions, and matching gift
-                  details.
-                </p>
-              )}
+              ) : null}
               {purchase}
               <a className="product-permalink" href={productLink}>
                 Link to this bag <ArrowRight size={14} aria-hidden="true" />

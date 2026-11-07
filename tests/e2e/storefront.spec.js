@@ -24,7 +24,8 @@ const bags = [
   {
     id: "woven",
     name: "The Woven with an exceptionally long product name for a considered wardrobe",
-    description: "An everyday companion.",
+    description:
+      "Artisanal texture, everyday elegance, made for getting away and coming home.",
     image_url: "/images/woven.webp",
     price: 35,
     in_stock: false,
@@ -59,6 +60,15 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function assertAlignedCards(page) {
+  for (const card of await page.locator(".bag").all()) {
+    const clipped = await card
+      .locator(".product-description")
+      .evaluate((p) => p.scrollHeight > p.clientHeight + 1);
+    if (clipped)
+      await expect(
+        card.getByRole("button", { name: "Read more", exact: true }),
+      ).toBeVisible();
+  }
   const boxes = await page.locator(".bag").evaluateAll((cards) =>
     cards.map((card) => {
       const box = card.getBoundingClientRect();
@@ -97,6 +107,7 @@ test("hero uses the requested copy and separates image, text, and CTA", async ({
   const subtitle = await page.locator(".hero-subtitle").boundingBox();
   const image = await page.locator(".hero-image").boundingBox();
   const copy = await page.locator(".hero-copy").boundingBox();
+  expect(image.height).toBeLessThanOrEqual(isMobile ? 180 : 380);
   expect(subtitle.y).toBeGreaterThan(heading.y + heading.height);
   if (isMobile)
     expect(image.y).toBeGreaterThanOrEqual(copy.y + copy.height - 1);
@@ -277,5 +288,5 @@ test("shared product links identify the exact bag and unavailable photos fail gr
     modal.getByText(
       "Ask our team for materials, dimensions, and matching gift details.",
     ),
-  ).toBeVisible();
+  ).toHaveCount(0);
 });
