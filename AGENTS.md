@@ -26,7 +26,8 @@ must include a canonical link that opens the exact bag and selected photo in
 Quick View, plus the direct public image URL. Show only verified
 owner-entered specifications; never invent materials or dimensions.
 Keep the hero near its previous 360–380px desktop height (180px image on mobile),
-with photography filling the frame vertically, tighter space above the hero,
+with the full photograph scaled to fit inside its frame without cropping,
+tighter space above the hero,
 and a dense collection of five columns on wide screens and two on phones.
 Use smaller product images and tight card spacing; avoid reserved empty blocks
 between description and price. Do not show a fallback request for materials,
