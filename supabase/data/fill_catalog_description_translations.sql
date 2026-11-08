@@ -75,6 +75,12 @@ from jsonb_to_recordset($copy$[
     "fr": "Des panneaux bordeaux à motifs contrastent avec des bordures noires et un emblème animal doré. Des anses arrondies et une longue bandoulière complètent ce sac, présenté avec une pochette rouge à cordon.",
     "ht": "Panno koulè diven ak desen fè yon bèl kontras ak rebò nwa yo ak yon anblèm bèt koulè lò. Manch won ak yon senti long konplete valiz la, ki prezante ak yon ti poche wouj ki fèmen ak kòd.",
     "es": "Paneles burdeos estampados contrastan con ribetes negros y un emblema de animal dorado. Asas redondeadas y una correa larga completan el bolso, presentado con una bolsa roja con cordón."
+  },
+  {
+    "original": "A beige handbag with vertical front stitching,\nrounded handles and an oval clasp. Shown with a\nsmaller matching bag featuring a curved flap and\ndark edging.",
+    "fr": "Un sac beige avec des coutures verticales sur le devant, des anses arrondies et un fermoir ovale. Il est présenté avec un petit sac assorti, doté d’un rabat incurvé et de bordures foncées.",
+    "ht": "Yon valiz bèj ak kouti vètikal devan, manch won ak yon fèmwa oval. Li prezante ak yon valiz pi piti ki mache avè l, ki gen yon rabat koube ak rebò fonse.",
+    "es": "Un bolso beige con costuras verticales en el frente, asas redondeadas y un cierre ovalado. Se presenta con un bolso más pequeño a juego, con solapa curva y ribetes oscuros."
   }
 ]$copy$::jsonb) as d(original text, fr text, ht text, es text)
 where p.description = d.original;
