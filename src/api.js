@@ -91,7 +91,7 @@ export const defaultSettings = {
   legal_reviewed: false,
   hero_heading: "Elevate Your Elegance",
   hero_description: "Luxury Women's Handbags with Exclusive Matching Gift",
-  hero_cta_text: "SHOP THE COLLECTION",
+  hero_cta_text: "Discover your exclusive rewards",
   hero_image_url: "/images/hero.webp",
   promo_banner_text: "Buy any bag and unlock a special Goove promo.",
 };

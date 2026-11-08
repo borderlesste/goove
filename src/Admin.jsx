@@ -24,6 +24,7 @@ export function Admin({ onCatalogChange }) {
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [resending, setResending] = useState(false),
+    [refreshingAccess, setRefreshingAccess] = useState(false),
     [notice, setNotice] = useState(""),
     [editing, setEditing] = useState(null),
     [generated, setGenerated] = useState(""),
@@ -53,6 +54,28 @@ export function Admin({ onCatalogChange }) {
       if (version === sessionVersion.current) setError(e.message);
     } finally {
       setBusy(false);
+    }
+  }
+  async function refreshAccess() {
+    if (busy || refreshingAccess) return;
+    const version = sessionVersion.current;
+    setRefreshingAccess(true);
+    setGenerated("");
+    setError("");
+    setNotice("");
+    try {
+      const result = await callApi("admin_refresh_access");
+      if (version !== sessionVersion.current) return;
+      setGenerated(result.code);
+      if (result.access_codes)
+        setData(
+          (current) =>
+            current && { ...current, access_codes: result.access_codes },
+        );
+    } catch (e) {
+      if (version === sessionVersion.current) setError(e.message);
+    } finally {
+      setRefreshingAccess(false);
     }
   }
   useEffect(() => {
@@ -560,17 +583,13 @@ export function Admin({ onCatalogChange }) {
           <h3>Customer access code</h3>
           <p>
             Refresh to create a new access code. Only the previous unused code
-            is disabled; codes customers have already used remain valid. Promo
-            codes are unchanged.
+            is disabled; used codes cannot be used again. Promo codes are
+            unchanged.
           </p>
-          <button
-            disabled={busy}
-            onClick={async () => {
-              const d = await act("admin_refresh_access");
-              if (d) setGenerated(d.code);
-            }}
-          >
-            REFRESH ACCESS CODE
+          <button disabled={busy || refreshingAccess} onClick={refreshAccess}>
+            {refreshingAccess
+              ? "REFRESHING ACCESS CODE…"
+              : "REFRESH ACCESS CODE"}
           </button>
           {generated && (
             <div className="generated">
@@ -772,9 +791,9 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
   async function upload(input) {
     const files = Array.from(input || []);
     if (!files.length) return;
-    if (draft.gallery_images.length + files.length > 3) {
+    if (draft.gallery_images.length + files.length > 10) {
       onError(
-        "Each item can have up to 3 gallery photos. Remove a photo before adding another.",
+        "Each item can have up to 10 gallery photos. Remove a photo before adding another.",
       );
       return;
     }
@@ -825,9 +844,9 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
         e.preventDefault();
         if (
           draft.gallery_images.length < 1 ||
-          draft.gallery_images.length > 3
+          draft.gallery_images.length > 10
         ) {
-          onError("Upload between 1 and 3 photos for each item.");
+          onError("Upload between 1 and 10 photos for each item.");
           return;
         }
         onSave({ ...draft, image_url: draft.gallery_images[0] });
@@ -865,7 +884,7 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
           </label>
         )}
         <label>
-          <UploadSimple /> Upload gallery photos (choose 1–3)
+          <UploadSimple /> Upload gallery photos (choose 1–10)
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -878,8 +897,8 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
           />
         </label>
         <p className="fine">
-          Upload 1 to 3 JPG, PNG, or WebP photos. Each photo must be under 5 MB.
-          Current count: {draft.gallery_images.length}.
+          Upload 1 to 10 JPG, PNG, or WebP photos. Each photo must be under 5
+          MB. Current count: {draft.gallery_images.length}.
         </p>
         <div className="editor-gallery">
           {draft.gallery_images.map((src, i) => (

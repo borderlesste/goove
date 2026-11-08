@@ -48,7 +48,7 @@ const catalog = {
     social_links: [],
     hero_heading: "Elevate Your Elegance",
     hero_description: "Luxury Women's Handbags with Exclusive Matching Gift",
-    hero_cta_text: "SHOP THE COLLECTION",
+    hero_cta_text: "Discover your exclusive rewards",
     hero_image_url: "/images/hero.webp",
     promo_banner_text: "Choose a bag, discover your matching gift.",
   },
@@ -78,14 +78,13 @@ async function assertAlignedCards(page) {
       return { top: box.top, height: box.height, actionTop: action.top };
     }),
   );
-  expect(
-    Math.max(...boxes.map((b) => b.height)) -
-      Math.min(...boxes.map((b) => b.height)),
-  ).toBeLessThan(2);
+
   for (const first of boxes)
     for (const other of boxes) {
-      if (Math.abs(first.top - other.top) < 2)
+      if (Math.abs(first.top - other.top) < 2) {
         expect(Math.abs(first.actionTop - other.actionTop)).toBeLessThan(2);
+        expect(Math.abs(first.height - other.height)).toBeLessThan(2);
+      }
     }
 }
 
@@ -115,8 +114,11 @@ test("hero uses the requested copy and separates image, text, and CTA", async ({
     expect(image.x).toBeGreaterThanOrEqual(copy.x + copy.width - 1);
     expect(image.width).toBeGreaterThan(400);
   }
-  await page.getByRole("link", { name: "SHOP THE COLLECTION" }).click();
-  await expect(page).toHaveURL(/#collection$/);
+  await page
+    .locator(".hero")
+    .getByRole("link", { name: "Discover your exclusive rewards" })
+    .click();
+  await expect(page).toHaveURL(/\/rewards$/);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -238,7 +240,7 @@ test("WhatsApp inquiries include the canonical bag link and the exact selected p
     "signature",
   );
   await card
-    .getByRole("button", { name: "Show photo 2 of The Signature" })
+    .getByRole("button", { name: "Next photo of The Signature" })
     .click();
   await checkMessage(
     card.getByRole("link", { name: "BUY THIS BAG" }),
@@ -276,7 +278,7 @@ test("a WhatsApp recipient opens the exact bag and selected photo directly", asy
     exact: true,
   });
   await card
-    .getByRole("button", { name: "Show photo 2 of The Signature" })
+    .getByRole("button", { name: "Next photo of The Signature" })
     .click();
   const message = new URL(
     await card.getByRole("link", { name: "BUY THIS BAG" }).getAttribute("href"),
@@ -296,7 +298,8 @@ test("a WhatsApp recipient opens the exact bag and selected photo directly", asy
     .getByRole("button", { name: "Close dialog", exact: true })
     .click();
   await page
-    .getByRole("link", { name: "SHOP THE COLLECTION", exact: true })
+    .locator(".hero")
+    .getByRole("link", { name: "Discover your exclusive rewards", exact: true })
     .click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
 });
@@ -315,6 +318,10 @@ test("gift flag stays visible while scrolling and across website routes", async 
       .evaluate((el) => Math.round(el.getBoundingClientRect().top)),
   ).toBe(0);
   await flag.click();
+  await expect(page).toHaveURL(/\/#collection$/);
+  await page
+    .getByRole("link", { name: "Gifts & Rewards", exact: true })
+    .click();
   await expect(page).toHaveURL(/\/rewards$/);
   await expect(flag).toBeInViewport();
   await page.getByRole("link", { name: "Owner access", exact: true }).click();
@@ -350,4 +357,57 @@ test("shared product links identify the exact bag and unavailable photos fail gr
       "Ask our team for materials, dimensions, and matching gift details.",
     ),
   ).toHaveCount(0);
+});
+
+test("ten-photo galleries open the shared photo and cycle with previous and next arrows", async ({
+  page,
+}) => {
+  const photos = Array.from(
+    { length: 10 },
+    (_, i) => `/images/signature.webp?photo=${i + 1}`,
+  );
+  await page.route("**/functions/v1/goove-api", (route) =>
+    route.fulfill({
+      json: { ...catalog, handbags: [{ ...bags[0], gallery_images: photos }] },
+    }),
+  );
+  await page.goto("/?bag=signature&photo=10#bag-signature");
+  const modal = page.getByRole("dialog", {
+    name: "The Signature",
+    exact: true,
+  });
+  await expect(modal.locator(".product-detail-photo img")).toHaveAttribute(
+    "src",
+    photos[9],
+  );
+  await expect(modal.locator(".product-photo-count")).toHaveText("10 / 10");
+  await modal
+    .getByRole("button", { name: "Next photo of The Signature", exact: true })
+    .click();
+  await expect(modal.locator(".product-detail-photo img")).toHaveAttribute(
+    "src",
+    photos[0],
+  );
+  await modal
+    .getByRole("button", {
+      name: "Previous photo of The Signature",
+      exact: true,
+    })
+    .click();
+  await expect(modal.locator(".product-detail-photo img")).toHaveAttribute(
+    "src",
+    photos[9],
+  );
+  await modal
+    .getByRole("button", { name: "Close dialog", exact: true })
+    .click();
+  await page.getByRole("link", { name: "Goove home", exact: true }).click();
+  await page
+    .getByRole("link", { name: "Gifts & Rewards", exact: true })
+    .click();
+  await page.locator(".promo-flag").click();
+  await expect(page).toHaveURL(/\/#collection$/);
+  await expect(
+    page.getByRole("heading", { name: "Handbags for every chapter." }),
+  ).toBeInViewport();
 });

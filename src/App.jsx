@@ -64,10 +64,17 @@ export function App() {
   }, []);
   const navigate = (e, to) => {
     e.preventDefault();
+    const destination = new URL(to, location.origin);
     history.pushState({}, "", to);
-    setPath(to);
+    setPath(destination.pathname);
     setProductTarget(readProductTarget(location.href));
     window.scrollTo({ top: 0, behavior: "instant" });
+    if (destination.hash === "#collection")
+      requestAnimationFrame(() =>
+        document
+          .getElementById("collection")
+          ?.scrollIntoView({ block: "start" }),
+      );
   };
   const rewards = path === "/rewards",
     adminPage = path === "/admin";
@@ -113,8 +120,8 @@ export function App() {
         <aside className="promo-flag-bar" aria-label="Goove gift promotion">
           <a
             className="promo-flag"
-            href="/rewards"
-            onClick={(e) => navigate(e, "/rewards")}
+            href="/#collection"
+            onClick={(e) => navigate(e, "/#collection")}
           >
             <Gift size={20} aria-hidden="true" />
             <span>{catalog.settings.promo_banner_text}</span>
@@ -183,7 +190,11 @@ export function App() {
                   {catalog.settings.hero_description ||
                     defaultSettings.hero_description}
                 </p>
-                <a className="button" href="#collection">
+                <a
+                  className="button"
+                  href="/rewards"
+                  onClick={(e) => navigate(e, "/rewards")}
+                >
                   {catalog.settings.hero_cta_text ||
                     defaultSettings.hero_cta_text}{" "}
                   <ArrowRight size={22} weight="light" />
@@ -350,6 +361,7 @@ function Rewards({ catalog }) {
   const panel = useRef();
   const accessInput = useRef();
   const stageHeading = useRef();
+  const reservationAttempt = useRef(null);
   const stage = state?.claim ? 2 : state ? 1 : 0;
   const availableCount =
     state?.codes?.filter((code) => code.status === "available").length || 0;
@@ -409,13 +421,29 @@ function Rewards({ catalog }) {
     setBusy(true);
     setError("");
     try {
-      const result = await callApi("reserve", {
-        access_code: access.trim(),
-        reward_code_id: rewardId,
-      });
+      if (
+        !state?.claim &&
+        (reservationAttempt.current?.rewardId !== rewardId ||
+          reservationAttempt.current?.access !== access.trim())
+      ) {
+        reservationAttempt.current = {
+          rewardId,
+          access: access.trim(),
+          id: crypto.randomUUID(),
+        };
+      }
+      const result = state?.claim
+        ? state
+        : await callApi("reserve", {
+            access_code: access.trim(),
+            reward_code_id: rewardId,
+            request_id: reservationAttempt.current.id,
+          });
       // Keep the immutable reservation recoverable even if WhatsApp cannot open.
       setState(result);
       setChoice(null);
+      setAccess("");
+      reservationAttempt.current = null;
       const link = whatsappPromoUrl(
         settings.whatsapp_number,
         result.claim.code,
@@ -433,6 +461,7 @@ function Rewards({ catalog }) {
     }
   }
   function changeAccess() {
+    reservationAttempt.current = null;
     setState(null);
     setChoice(null);
     setAccess("");

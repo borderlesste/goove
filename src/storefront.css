@@ -68,7 +68,7 @@
   width: 100%;
   height: 360px;
   min-height: 0;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
 }
 .collection {
@@ -102,7 +102,7 @@
 .bag-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
+  grid-auto-rows: auto;
   gap: 20px 14px;
 }
 .bag {
@@ -163,10 +163,6 @@
   flex-direction: column;
   flex: 1;
   padding: 6px 12px 12px;
-}
-.product-photo-options {
-  min-height: 44px;
-  margin-bottom: 4px;
 }
 .product-thumbnails {
   display: flex;
@@ -243,8 +239,8 @@
   text-underline-offset: 4px;
 }
 .bag .product-price {
-  margin: auto 0 8px;
-  padding-top: 8px;
+  margin: 8px 0;
+  padding-top: 0;
   font:
     500 16px/1.5 "Inter",
     sans-serif;
@@ -263,6 +259,44 @@
     500 10px/1.5 "Inter",
     sans-serif;
   letter-spacing: 0.5px;
+}
+.product-copy > .product-purchase {
+  margin-top: auto;
+}
+.product-photo-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #d9d7c9;
+  border-radius: 50%;
+  background: #fffef9ed;
+  color: #284b36;
+  z-index: 1;
+}
+.product-photo-arrow:hover {
+  background: #fff;
+  color: #1e3d2a;
+}
+.product-photo-arrow.previous {
+  left: 8px;
+}
+.product-photo-arrow.next {
+  right: 8px;
+}
+.product-photo-count {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 4px 8px;
+  background: #fffef9ed;
+  color: #284b36;
+  font:
+    500 12px/1.5 "Inter",
+    sans-serif;
 }
 .product-purchase .buy-button {
   background: #2c4636;
@@ -314,7 +348,7 @@
   z-index: 10;
   display: flex;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 4px 12px;
   background: #fbf9f5f5;
   border-bottom: 1px solid #e7e0d4;
   backdrop-filter: blur(8px);
@@ -391,7 +425,7 @@
 }
 @media (max-width: 540px) {
   .promo-flag-bar {
-    padding: 6px 10px;
+    padding: 3px 10px;
   }
   .promo-flag {
     font-size: 12px;
@@ -436,6 +470,7 @@ dialog.product-modal {
   min-width: 0;
 }
 .product-detail-photo {
+  position: relative;
   width: 100%;
   aspect-ratio: 1;
   background: #eeeee7;
@@ -634,5 +669,16 @@ dialog.product-modal {
   }
   .promo-flag {
     transition: none;
+  }
+}
+
+@media (min-width: 901px) {
+  .site-header {
+    height: 64px;
+  }
+}
+@media (max-width: 600px) {
+  .site-header {
+    height: 68px;
   }
 }

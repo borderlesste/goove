@@ -8,6 +8,17 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17.6-alpine3.22@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+        env:
+          POSTGRES_PASSWORD: local-ci-test-only
+          POSTGRES_DB: goove_test
+        options: >-
+          --health-cmd "pg_isready -U postgres -d goove_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -21,4 +32,6 @@ jobs:
       - run: deno task --cwd supabase/functions check
       - run: npx playwright install --with-deps chromium
       - run: npm run check
+        env:
+          GOOVE_TEST_POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
       - run: npm audit --audit-level=moderate

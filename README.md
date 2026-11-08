@@ -57,6 +57,30 @@ The gift promotion is a ribbon in a sticky top strip. It stays visible while
 scrolling and navigating between pages without floating over purchase actions.
 Its shimmer and hover effects respect reduced-motion preferences.
 
+The gift flag leads to `/#collection`; both “Discover your exclusive rewards”
+links lead to `/rewards`. Owners can upload 1–10 ordered photos per bag or gift.
+Quick View includes previous/next arrows, a photo count, and direct sharing of
+the selected image.
+
+An access code is consumed by one successful promo selection. A used code cannot
+unlock the selection flow again, including legacy used codes without a claim.
+Reservations carry a random request receipt: retries of the same request return
+the original claim, while a different receipt or selection is rejected. The
+saved browser view can resend its WhatsApp inquiry without reserving again.
+Customer contact details remain in WhatsApp, rather than the reservation request.
+
+The database locks selections in a consistent order. Two customers choosing the
+same promotion wait for each other and receive different code values; each value
+is archived permanently, and historical values cannot be issued again. Refreshing
+the admin access code updates its section and history without refreshing the
+catalog or promo inventory.
+
+CI runs a real PostgreSQL concurrency check using a pinned Docker image. To run
+it locally, set `GOOVE_TEST_POSTGRES_CONTAINER` to a dedicated PostgreSQL test
+container before `npm run check`. The test creates and removes its own database;
+without this environment variable it is skipped, while SQL lifecycle tests still
+run through PGlite. Never point this test at a production database container.
+
 ## Vercel
 
 `vercel.json` installs with `npm ci`, builds with `npm run build`, publishes

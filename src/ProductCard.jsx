@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { ArrowRight } from "@phosphor-icons/react/dist/csr/ArrowRight";
+import { ArrowLeft } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { WhatsappLogo } from "@phosphor-icons/react/dist/csr/WhatsappLogo";
 import { MagnifyingGlassPlus } from "@phosphor-icons/react/dist/csr/MagnifyingGlassPlus";
 import { Modal } from "./Modal";
@@ -123,6 +124,24 @@ export function ProductCard({ bag, phone, target }) {
         ))}
       </div>
     );
+  const photoArrows = photos.length > 1 && (
+    <>
+      <button
+        className="product-photo-arrow previous"
+        aria-label={`Previous photo of ${bag.name}`}
+        onClick={() => setIndex((i) => (i - 1 + photos.length) % photos.length)}
+      >
+        <ArrowLeft size={19} aria-hidden="true" />
+      </button>
+      <button
+        className="product-photo-arrow next"
+        aria-label={`Next photo of ${bag.name}`}
+        onClick={() => setIndex((i) => (i + 1) % photos.length)}
+      >
+        <ArrowRight size={19} aria-hidden="true" />
+      </button>
+    </>
+  );
 
   return (
     <article className="bag" id={`bag-${bag.id}`} aria-label={bag.name}>
@@ -144,9 +163,9 @@ export function ProductCard({ bag, phone, target }) {
             <MagnifyingGlassPlus size={17} aria-hidden="true" /> QUICK VIEW
           </span>
         </button>
+        {photoArrows}
       </div>
       <div className="product-copy">
-        <div className="product-photo-options">{thumbnails("collection")}</div>
         <h3>{bag.name}</h3>
         <p
           ref={descriptionRef}
@@ -186,6 +205,12 @@ export function ProductCard({ bag, phone, target }) {
                   width="1400"
                   height="1400"
                 />
+                {photoArrows}
+                {photos.length > 1 && (
+                  <span className="product-photo-count" aria-live="polite">
+                    {index + 1} / {photos.length}
+                  </span>
+                )}
               </div>
               {thumbnails("quick view")}
             </div>

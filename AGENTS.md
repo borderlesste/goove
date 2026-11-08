@@ -26,10 +26,21 @@ must include a canonical link that opens the exact bag and selected photo in
 Quick View, plus the direct public image URL. Show only verified
 owner-entered specifications; never invent materials or dimensions.
 Keep the hero near its previous 360–380px desktop height (180px image on mobile),
+with photography filling the frame vertically and tighter space above the hero.
 with a dense collection of five columns on wide screens and two on phones.
 Use smaller product images and tight card spacing; avoid reserved empty blocks
 between description and price. Do not show a fallback request for materials,
 dimensions, or gift details: those belong in the product descriptions.
+
+The gift flag always goes to `/#collection`; “Discover your exclusive rewards”
+goes to `/rewards`. Keep the description-to-price gap compact without shrinking
+product photography or text. Galleries support 1–10 ordered photos for bags and
+gifts, with previous/next arrows in Quick View. Access codes authorize one promo
+selection and cannot reopen the selection flow after use. Only an identical
+reservation receipt can retry the original request; the saved on-screen claim
+can be resent to WhatsApp without another reservation. Refresh access independently
+of promo inventory. Serialize competing selections and rotate to a never-issued
+code inside the same database transaction.
 
 ## Development tools
 
@@ -53,4 +64,4 @@ When implementing from a selected generated mock, treat that image as the source
 
 Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.
 
-Prototype preferences: In Admin → Codes, keep the dedicated promo-code refresh control directly below “Each promo code can be selected once. Pause a code to remove it from the customer list.” Keep access-code refresh separate. Promo-code refresh must ask for confirmation, change the code while keeping the promotion listed for customers, and preserve the selection identifier. Every active promotion must appear in the public gift catalog and have one available promo code; show already-selected codes in the customer list as unavailable instead of removing them. Create a code automatically when a promotion is created or reactivated. Customers with a verified access code can refresh the available-code list without gaining another selection. Refreshing an access code must not change promo-code status. In Admin → Gifts, provide a direct way to hide and reactivate each promotion; hidden promotions stay out of both customer-facing gift and promo lists. In Admin → Settings, allow the owner to manage the public phone number, email address, and social media links shown on the customer-facing site. Let the owner upload 1–3 ordered photos for each handbag and gift, and use consistent, standard photo frames and readable text sizes on Rewards.
+Prototype preferences: In Admin → Codes, keep the dedicated promo-code refresh control directly below “Each promo code can be selected once. Pause a code to remove it from the customer list.” Keep access-code refresh separate. Promo-code refresh must ask for confirmation, change the code while keeping the promotion listed for customers, and preserve the selection identifier. Every active promotion must appear in the public gift catalog and have one available promo code; show already-selected codes in the customer list as unavailable instead of removing them. Create a code automatically when a promotion is created or reactivated. Customers with a verified access code can refresh the available-code list without gaining another selection. Refreshing an access code must not change promo-code status. In Admin → Gifts, provide a direct way to hide and reactivate each promotion; hidden promotions stay out of both customer-facing gift and promo lists. In Admin → Settings, allow the owner to manage the public phone number, email address, and social media links shown on the customer-facing site. Let the owner upload 1–10 ordered photos for each handbag and gift, and use consistent, standard photo frames and readable text sizes on Rewards.

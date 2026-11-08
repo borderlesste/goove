@@ -21,6 +21,11 @@ const claim = {
 test("signing out clears the owner view and generated codes", async ({
   page,
 }) => {
+  const actions = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/functions/v1/goove-api"))
+      actions.push(request.postDataJSON().action);
+  });
   const user = {
     id: "33333333-3333-4333-8333-333333333333",
     email: "owner@example.test",
@@ -71,10 +76,12 @@ test("signing out clears the owner view and generated codes", async ({
     await page.getByRole("tab", { name: "Codes", exact: true }).click();
   };
   await login();
+  const beforeAccessRefresh = actions.length;
   await page
     .getByRole("button", { name: "REFRESH ACCESS CODE", exact: true })
     .click();
   await expect(page.locator("code")).toHaveText("GOOVE-TEST-GENERATED");
+  expect(actions.slice(beforeAccessRefresh)).toEqual(["admin_refresh_access"]);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page.getByLabel("Email address")).toBeVisible();
   await expect(page.locator("code")).toHaveCount(0);
@@ -441,7 +448,7 @@ test("a saved reservation remains usable when WhatsApp does not navigate", async
   const resend = page.getByRole("button", { name: "CONTINUE TO WHATSAPP" });
   await expect(resend).toBeEnabled();
   await resend.click();
-  await expect.poll(() => reservations.length).toBe(2);
+  await expect.poll(() => reservations.length).toBe(1);
   expect(reservations.every((body) => body.reward_code_id === rewardId)).toBe(
     true,
   );
@@ -451,4 +458,27 @@ test("a saved reservation remains usable when WhatsApp does not navigate", async
     ),
   ).toBe(true);
   await expect(resend).toBeEnabled();
+});
+
+test("retrying a failed reservation keeps its receipt instead of making a second selection", async ({
+  page,
+}) => {
+  const requests = [];
+  await page.route("https://wa.me/**", (route) =>
+    route.fulfill({ status: 204, body: "" }),
+  );
+  await mockApi(page, (route, body) => {
+    requests.push(body);
+    return requests.length === 1
+      ? route.fulfill({ status: 503, json: { error: "Please try again." } })
+      : route.fulfill({ json: { claim } });
+  });
+  const dialog = await choosePromo(page);
+  await dialog.getByRole("button", { name: "CONTINUE TO WHATSAPP" }).click();
+  await expect(dialog.getByRole("alert")).toHaveText("Please try again.");
+  await dialog.getByRole("button", { name: "CONTINUE TO WHATSAPP" }).click();
+  await expect(page.getByRole("heading", { name: claim.code })).toBeVisible();
+  expect(requests).toHaveLength(2);
+  expect(requests[0].request_id).toMatch(/^[a-f0-9-]{36}$/);
+  expect(requests[1].request_id).toBe(requests[0].request_id);
 });
