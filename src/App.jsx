@@ -394,7 +394,14 @@ function Rewards({ catalog }) {
     setBusy(true);
     setError("");
     try {
-      setState(await callApi("verify", { access_code: access.trim() }));
+      const result = await callApi("verify", { access_code: access.trim() });
+      if (result.claim) {
+        setState(null);
+        throw Error(
+          "This access code has already been used. Ask Goove for a new access code.",
+        );
+      }
+      setState(result);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -437,7 +444,7 @@ function Rewards({ catalog }) {
         : await callApi("reserve", {
             access_code: access.trim(),
             reward_code_id: rewardId,
-            request_id: reservationAttempt.current.id,
+            purchase_reference: reservationAttempt.current.id,
           });
       // Keep the immutable reservation recoverable even if WhatsApp cannot open.
       setState(result);

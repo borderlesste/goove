@@ -81,7 +81,10 @@ test("signing out clears the owner view and generated codes", async ({
     .getByRole("button", { name: "REFRESH ACCESS CODE", exact: true })
     .click();
   await expect(page.locator("code")).toHaveText("GOOVE-TEST-GENERATED");
-  expect(actions.slice(beforeAccessRefresh)).toEqual(["admin_refresh_access"]);
+  expect(actions.slice(beforeAccessRefresh)).toEqual([
+    "admin_refresh_access",
+    "admin_list",
+  ]);
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page.getByLabel("Email address")).toBeVisible();
   await expect(page.locator("code")).toHaveCount(0);
@@ -132,6 +135,32 @@ async function choosePromo(page) {
     .fill("+1 717 555 0100");
   return dialog;
 }
+
+test("a used access code cannot reopen promo selection in the website", async ({
+  page,
+}) => {
+  const actions = [];
+  await page.route("**/functions/v1/goove-api", (route) => {
+    const body = route.request().postDataJSON();
+    actions.push(body.action);
+    return route.fulfill({
+      json: body.action === "catalog" ? catalog : { claim },
+    });
+  });
+  await page.goto("/rewards");
+  await page
+    .getByRole("button", { name: "VIEW AVAILABLE PROMO CODES" })
+    .click();
+  await page
+    .getByLabel("Access code", { exact: true })
+    .fill("GOOVE-" + "A".repeat(48));
+  await page.getByRole("button", { name: "VIEW MY PROMO CODES" }).click();
+  await expect(page.getByRole("alert")).toContainText("already been used");
+  await expect(
+    page.getByRole("button", { name: /^Select promo / }),
+  ).toHaveCount(0);
+  expect(actions).not.toContain("reserve");
+});
 
 test("owner sign-in remains reachable when the public catalog fails", async ({
   page,
@@ -479,6 +508,6 @@ test("retrying a failed reservation keeps its receipt instead of making a second
   await dialog.getByRole("button", { name: "CONTINUE TO WHATSAPP" }).click();
   await expect(page.getByRole("heading", { name: claim.code })).toBeVisible();
   expect(requests).toHaveLength(2);
-  expect(requests[0].request_id).toMatch(/^[a-f0-9-]{36}$/);
-  expect(requests[1].request_id).toBe(requests[0].request_id);
+  expect(requests[0].purchase_reference).toMatch(/^[a-f0-9-]{36}$/);
+  expect(requests[1].purchase_reference).toBe(requests[0].purchase_reference);
 });

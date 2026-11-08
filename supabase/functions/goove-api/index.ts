@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST")
     return reply({ error: "Method not allowed." }, 405);
   try {
-    const body = await readJsonBody(req, 32_000);
+    const body = await readJsonBody(req);
     const action = body.action;
     if (action === "catalog") {
       const [handbags, gifts, s] = await Promise.all([
@@ -160,17 +160,19 @@ Deno.serve(async (req) => {
         return reply({ error: "This access code is invalid or expired." }, 400);
       if (action === "reserve" && !uuid(body.reward_code_id))
         return reply({ error: "Choose a valid reward code." }, 400);
-      if (body.request_id !== undefined && !uuid(body.request_id))
-        return reply({ error: "Please retry your selection." }, 400);
       return reply(
         unwrap(
-          await db.rpc("goove_select_reward", {
+          await db.rpc("goove_reward", {
             p_action: action,
             p_hash: await sha(access),
             p_reward_id: action === "reserve" ? body.reward_code_id : null,
-            p_request_id:
-              action === "reserve"
-                ? body.request_id || crypto.randomUUID()
+            p_name:
+              typeof body.customer_name === "string"
+                ? body.customer_name
+                : null,
+            p_reference:
+              typeof body.purchase_reference === "string"
+                ? body.purchase_reference
                 : null,
           }),
         ),
@@ -262,14 +264,7 @@ Deno.serve(async (req) => {
     if (action === "admin_refresh_access") {
       const code = "GOOVE-" + randomCode();
       unwrap(await db.rpc("goove_refresh_access", { p_hash: await sha(code) }));
-      const access_codes = unwrap(
-        await db
-          .from("purchase_access_codes")
-          .select("id,purchase_reference,status,expires_at,created_at")
-          .order("created_at", { ascending: false })
-          .limit(100),
-      );
-      return reply({ code, access_codes });
+      return reply({ code });
     }
     if (action === "admin_generate_rewards") {
       if (!uuid(body.gift_type_id)) throw Error("Choose a promotion.");
@@ -342,7 +337,7 @@ Deno.serve(async (req) => {
       if (
         saveGallery &&
         (photos.length < 1 ||
-          photos.length > 10 ||
+          photos.length > 3 ||
           photos.some(
             (p: any) =>
               typeof p !== "string" ||
@@ -350,7 +345,7 @@ Deno.serve(async (req) => {
                 !p.startsWith(url + "/storage/v1/object/public/goove-images/")),
           ))
       )
-        throw Error("Add between 1 and 10 uploaded photos for each item.");
+        throw Error("Add between 1 and 3 uploaded photos for each item.");
       if (saveGallery) item.image_url = photos[0];
       if (body.table === "handbags") {
         if (i.specifications !== undefined) {

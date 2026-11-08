@@ -39,7 +39,7 @@ function sql(query, application = "goove_test") {
   });
 }
 const reservation = (hash, reward, request) =>
-  `set role service_role; select public.goove_select_reward('reserve','${hash}','${reward}','${request}');`;
+  `set role service_role; select public.goove_reward('reserve','${hash}','${reward}',null,'${request}');`;
 const uuid = (n) => `${String(n).padStart(8, "0")}-1111-4111-8111-111111111111`;
 const hash = (n) => n.toString(16).padStart(64, "0");
 
@@ -142,7 +142,7 @@ test(
         "3",
       );
       await assert.rejects(
-        sql(`select goove_select_reward('verify','${hash(1)}');`),
+        sql(`select goove_reward('verify','${hash(1)}');`),
         /already been used/,
       );
       assert.equal(

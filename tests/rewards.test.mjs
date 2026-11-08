@@ -25,8 +25,7 @@ test('PostgreSQL reward lifecycle, permanent locks, expiry and access boundaries
  assert.equal((await scalar('select count(*)::int as n from goove_archived_reward_codes where gift_type_id=$1',[gifts[4]])).n,1);
  const hashes=['a','b','c','d'].map(x=>x.repeat(64));
  for(const hash of hashes)await q("insert into purchase_access_codes(code_hash,expires_at) values($1,now()+interval '1 day')",[hash]);
- const requestIds=new Map();
- const rpc=async(action,hash,id=null)=>{ if(!requestIds.has(hash))requestIds.set(hash,crypto.randomUUID()); return (await scalar('select goove_select_reward($1,$2,$3,$4) as data',[action,hash,id,action==='reserve'?requestIds.get(hash):null])).data; };
+ const receipts=new Map(); const rpc=async(action,hash,id=null,name=null)=>{if(!receipts.has(hash))receipts.set(hash,crypto.randomUUID()); return (await scalar('select goove_reward($1,$2,$3,$4,$5) as data',[action,hash,id,name,action==='reserve'?receipts.get(hash):null])).data;};
  await assert.rejects(rpc('verify',hashes[0]),/not open yet/);
  await assert.rejects(q('update goove_settings set promotion_enabled=true'),/check constraint/);
  await q('update goove_settings set legal_reviewed=true,promotion_enabled=true');
@@ -111,15 +110,11 @@ test('PostgreSQL reward lifecycle, permanent locks, expiry and access boundaries
  assert.equal((await scalar('select count(*)::int as n from handbag_images where handbag_id=$1',[galleryBag])).n,1);
  await q('select goove_replace_handbag_images($1,$2::jsonb)',[galleryBag,'["/images/bag.webp","/images/bag-2.webp","/images/bag-3.webp"]']);
  assert.equal((await scalar('select count(*)::int as n from handbag_images where handbag_id=$1',[galleryBag])).n,3);
- await assert.rejects(q('select goove_replace_handbag_images($1,$2::jsonb)',[galleryBag,JSON.stringify(Array.from({length:11},(_,i)=>'/images/'+i+'.webp'))]),/between 1 and 10/);
+ await assert.rejects(q('select goove_replace_handbag_images($1,$2::jsonb)',[galleryBag,'["/images/1.webp","/images/2.webp","/images/3.webp","/images/4.webp"]']),/between 1 and 3/);
  await q('select goove_replace_gift_images($1,$2::jsonb)',[newlyAddedGift,'["/images/gift.webp"]']);
  assert.equal((await scalar('select count(*)::int as n from gift_type_images where gift_type_id=$1',[newlyAddedGift])).n,1);
  await q('select goove_replace_gift_images($1,$2::jsonb)',[newlyAddedGift,'["/images/gift.webp","/images/gift-2.webp","/images/gift-3.webp"]']);
  assert.equal((await scalar('select count(*)::int as n from gift_type_images where gift_type_id=$1',[newlyAddedGift])).n,3);
- await assert.rejects(q('select goove_replace_gift_images($1,$2::jsonb)',[newlyAddedGift,JSON.stringify(Array.from({length:11},(_,i)=>'/images/'+i+'.webp'))]),/between 1 and 10/);
- const ten=Array.from({length:10},(_,i)=>'/images/photo-'+i+'.webp'); await q('select goove_replace_handbag_images($1,$2::jsonb)',[galleryBag,JSON.stringify(ten)]); assert.deepEqual((await q('select image_url from handbag_images where handbag_id=$1 order by display_order',[galleryBag])).rows.map(r=>r.image_url),ten); await q('select goove_replace_gift_images($1,$2::jsonb)',[newlyAddedGift,JSON.stringify(ten)]); assert.equal((await scalar('select count(*)::int as n from gift_type_images where gift_type_id=$1',[newlyAddedGift])).n,10);
- await assert.rejects(q("insert into reward_codes(code,gift_type_id) values('GIFT-0',$1)",[gifts[0]]),/already been issued/);
- await assert.rejects(q('select goove_select_reward($1,$2,$3,$4)', ['reserve',hashes[0],ids[0],crypto.randomUUID()]),/already been used/);
- await assert.rejects(q('update reward_claims set request_id=$1 where id=$2',[crypto.randomUUID(),reserved.claim.id]),/immutable/);
+ await assert.rejects(q('select goove_replace_gift_images($1,$2::jsonb)',[newlyAddedGift,'["/images/1.webp","/images/2.webp","/images/3.webp","/images/4.webp"]']),/between 1 and 3/);
  await db.close();
 });

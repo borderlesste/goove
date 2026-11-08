@@ -359,11 +359,11 @@ test("shared product links identify the exact bag and unavailable photos fail gr
   ).toHaveCount(0);
 });
 
-test("ten-photo galleries open the shared photo and cycle with previous and next arrows", async ({
+test("three-photo galleries open the shared photo and cycle with previous and next arrows", async ({
   page,
 }) => {
   const photos = Array.from(
-    { length: 10 },
+    { length: 3 },
     (_, i) => `/images/signature.webp?photo=${i + 1}`,
   );
   await page.route("**/functions/v1/goove-api", (route) =>
@@ -371,16 +371,16 @@ test("ten-photo galleries open the shared photo and cycle with previous and next
       json: { ...catalog, handbags: [{ ...bags[0], gallery_images: photos }] },
     }),
   );
-  await page.goto("/?bag=signature&photo=10#bag-signature");
+  await page.goto("/?bag=signature&photo=3#bag-signature");
   const modal = page.getByRole("dialog", {
     name: "The Signature",
     exact: true,
   });
   await expect(modal.locator(".product-detail-photo img")).toHaveAttribute(
     "src",
-    photos[9],
+    photos[2],
   );
-  await expect(modal.locator(".product-photo-count")).toHaveText("10 / 10");
+  await expect(modal.locator(".product-photo-count")).toHaveText("3 / 3");
   await modal
     .getByRole("button", { name: "Next photo of The Signature", exact: true })
     .click();
@@ -396,7 +396,7 @@ test("ten-photo galleries open the shared photo and cycle with previous and next
     .click();
   await expect(modal.locator(".product-detail-photo img")).toHaveAttribute(
     "src",
-    photos[9],
+    photos[2],
   );
   await modal
     .getByRole("button", { name: "Close dialog", exact: true })

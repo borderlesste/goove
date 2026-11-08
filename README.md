@@ -58,28 +58,25 @@ scrolling and navigating between pages without floating over purchase actions.
 Its shimmer and hover effects respect reduced-motion preferences.
 
 The gift flag leads to `/#collection`; both “Discover your exclusive rewards”
-links lead to `/rewards`. Owners can upload 1–10 ordered photos per bag or gift.
+links lead to `/rewards`. Owners can upload 1–3 ordered photos per bag or gift.
 Quick View includes previous/next arrows, a photo count, and direct sharing of
 the selected image.
 
-An access code is consumed by one successful promo selection. A used code cannot
-unlock the selection flow again, including legacy used codes without a claim.
-Reservations carry a random request receipt: retries of the same request return
-the original claim, while a different receipt or selection is rejected. The
-saved browser view can resend its WhatsApp inquiry without reserving again.
-Customer contact details remain in WhatsApp, rather than the reservation request.
+An access code is consumed by one successful selection and cannot reopen the
+flow after use. A random client receipt becomes the claim ID, so retrying the
+same reservation returns its original result without another allocation. Different
+receipts or selections cannot reuse the access code. The saved browser view can
+resend WhatsApp without reserving again. The existing RPC's `p_reference` parameter
+carries this receipt; purchase reference text still comes from the access record.
 
-The database locks selections in a consistent order. Two customers choosing the
-same promotion wait for each other and receive different code values; each value
-is archived permanently, and historical values cannot be issued again. Refreshing
-the admin access code updates its section and history without refreshing the
-catalog or promo inventory.
+The database locks the settings, access row and selected promotion consistently.
+Competing customers wait and receive different promo values. Historical selected
+values stay unique, and refreshing access never rotates promo inventory. The
+migration changes one existing function; it adds no tables, columns, or privileges.
 
-CI runs a real PostgreSQL concurrency check using a pinned Docker image. To run
-it locally, set `GOOVE_TEST_POSTGRES_CONTAINER` to a dedicated PostgreSQL test
-container before `npm run check`. The test creates and removes its own database;
-without this environment variable it is skipped, while SQL lifecycle tests still
-run through PGlite. Never point this test at a production database container.
+Refreshing access updates only the displayed code and access-code history. On
+older API deployments the app reads the admin snapshot but merges only its access
+history, leaving promo inventory and the public catalog untouched.
 
 ## Vercel
 

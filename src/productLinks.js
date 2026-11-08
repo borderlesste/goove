@@ -24,7 +24,7 @@ export function readProductTarget(href) {
   return {
     id,
     photoIndex:
-      Number.isInteger(photo) && photo >= 1 && photo <= 10 ? photo - 1 : 0,
+      Number.isInteger(photo) && photo >= 1 && photo <= 3 ? photo - 1 : 0,
     open: Boolean(requested),
   };
 }
