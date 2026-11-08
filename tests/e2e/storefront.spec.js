@@ -135,6 +135,13 @@ test("cards and actions align even when descriptions expand", async ({
   });
   const toggle = card.getByRole("button", { name: "Read more", exact: true });
   await expect(toggle).toBeVisible();
+  for (const item of await page.locator(".bag").all()) {
+    const title = await item.locator("h3").boundingBox();
+    const description = await item
+      .locator(".product-description")
+      .boundingBox();
+    expect(description.y - title.y - title.height).toBeLessThanOrEqual(5);
+  }
   await assertAlignedCards(page);
   await toggle.click();
   await expect(
@@ -154,13 +161,6 @@ test("cards and actions align even when descriptions expand", async ({
       .getByRole("article", { name: bags[2].name })
       .getByRole("link", { name: "BUY THIS BAG" }),
   ).toHaveCount(0);
-  const promo = await page.locator(".promo-flag").evaluate((el) => ({
-    position: getComputedStyle(el).position,
-    top: el.getBoundingClientRect().top,
-  }));
-  expect(promo.position).toBe("static");
-  const grid = await page.locator(".bag-grid").boundingBox();
-  expect(promo.top).toBeGreaterThan(grid.y + grid.height);
 });
 
 test("Quick View opens from the image, shows full details, and restores keyboard focus", async ({
@@ -226,7 +226,9 @@ test("WhatsApp inquiries include the canonical bag link and the exact selected p
     expect(url.origin + url.pathname).toBe("https://wa.me/17176554737");
     const message = url.searchParams.get("text");
     expect(message).toContain("The Signature");
-    expect(message).toContain("https://goove.vercel.app/#bag-signature");
+    expect(message).toContain(
+      `https://goove.vercel.app/?bag=signature&photo=${photo === "signature" ? 1 : 2}#bag-signature`,
+    );
     expect(message).toContain(
       `Product photo: https://goove.vercel.app/images/${photo}.webp`,
     );
@@ -263,6 +265,65 @@ test("WhatsApp inquiries include the canonical bag link and the exact selected p
     modal.getByRole("link", { name: "BUY THIS BAG" }),
     "signature",
   );
+});
+
+test("a WhatsApp recipient opens the exact bag and selected photo directly", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const card = page.getByRole("article", {
+    name: "The Signature",
+    exact: true,
+  });
+  await card
+    .getByRole("button", { name: "Show photo 2 of The Signature" })
+    .click();
+  const message = new URL(
+    await card.getByRole("link", { name: "BUY THIS BAG" }).getAttribute("href"),
+  ).searchParams.get("text");
+  const productURL = new URL(message.match(/Selected product: (.+)/)[1]);
+  await page.goto(productURL.pathname + productURL.search + productURL.hash);
+  const modal = page.getByRole("dialog", {
+    name: "The Signature",
+    exact: true,
+  });
+  await expect(modal).toBeVisible();
+  await expect(modal.locator(".product-detail-photo img")).toHaveAttribute(
+    "src",
+    "/images/day-tote.webp",
+  );
+  await modal
+    .getByRole("button", { name: "Close dialog", exact: true })
+    .click();
+  await page
+    .getByRole("link", { name: "SHOP THE COLLECTION", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
+test("gift flag stays visible while scrolling and across website routes", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const flag = page.locator(".promo-flag");
+  await expect(flag).toBeInViewport();
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  await expect(flag).toBeInViewport();
+  expect(
+    await page
+      .locator(".promo-flag-bar")
+      .evaluate((el) => Math.round(el.getBoundingClientRect().top)),
+  ).toBe(0);
+  await flag.click();
+  await expect(page).toHaveURL(/\/rewards$/);
+  await expect(flag).toBeInViewport();
+  await page.getByRole("link", { name: "Owner access", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(flag).toBeInViewport();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(
+    await flag.evaluate((el) => getComputedStyle(el, "::after").animationName),
+  ).toBe("none");
 });
 
 test("shared product links identify the exact bag and unavailable photos fail gracefully", async ({

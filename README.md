@@ -47,9 +47,15 @@ Owners can add verified specifications under **Admin → Handbags → Edit →
 Specifications** (up to 1,500 characters). Product descriptions can include
 materials, dimensions, and gift details; empty specifications add no contact
 prompt. WhatsApp inquiries from
-cards and Quick View include the canonical bag permalink and the direct image
-URL of the selected gallery photo. WhatsApp receives image links in the inquiry
+cards and Quick View include a canonical link that opens the exact bag and
+selected gallery photo in Quick View, plus the direct public image URL.
+Previously shared `#bag-…` links still scroll to their product card.
+WhatsApp receives image links in the inquiry
 text; the website does not upload attachments or send messages automatically.
+
+The gift promotion is a ribbon in a sticky top strip. It stays visible while
+scrolling and navigating between pages without floating over purchase actions.
+Its shimmer and hover effects respect reduced-motion preferences.
 
 ## Vercel
 

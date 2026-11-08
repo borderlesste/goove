@@ -15,6 +15,7 @@ import {
 } from "./api";
 import { Modal } from "./Modal";
 import { ProductCard } from "./ProductCard";
+import { readProductTarget } from "./productLinks";
 const Admin = lazy(() =>
   import("./Admin").then((module) => ({ default: module.Admin })),
 );
@@ -27,7 +28,10 @@ export function App() {
     }),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
-    [confirmation, setConfirmation] = useState(null);
+    [confirmation, setConfirmation] = useState(null),
+    [productTarget, setProductTarget] = useState(() =>
+      readProductTarget(location.href),
+    );
   async function refresh() {
     try {
       setCatalog(await loadCatalog());
@@ -47,28 +51,32 @@ export function App() {
   }, []);
   useEffect(() => {
     refresh();
-    const pop = () => setPath(location.pathname);
+    const pop = () => {
+      setPath(location.pathname);
+      setProductTarget(readProductTarget(location.href));
+    };
     addEventListener("popstate", pop);
-    return () => removeEventListener("popstate", pop);
+    addEventListener("hashchange", pop);
+    return () => {
+      removeEventListener("popstate", pop);
+      removeEventListener("hashchange", pop);
+    };
   }, []);
   const navigate = (e, to) => {
     e.preventDefault();
     history.pushState({}, "", to);
     setPath(to);
+    setProductTarget(readProductTarget(location.href));
     window.scrollTo({ top: 0, behavior: "instant" });
   };
   const rewards = path === "/rewards",
     adminPage = path === "/admin";
   useEffect(() => {
-    if (path !== "/" || loading || !location.hash.startsWith("#bag-")) return;
-    try {
-      document
-        .getElementById(decodeURIComponent(location.hash.slice(1)))
-        ?.scrollIntoView({ block: "center" });
-    } catch {
-      /* Ignore malformed fragments from external links. */
-    }
-  }, [path, loading, catalog.handbags]);
+    if (path !== "/" || loading || !productTarget) return;
+    document
+      .getElementById(`bag-${productTarget.id}`)
+      ?.scrollIntoView({ block: "center" });
+  }, [path, loading, catalog.handbags, productTarget]);
   useEffect(() => {
     document.title = `${rewards ? "Exclusive Gifts & Rewards" : adminPage ? "Goove Studio" : "Handbag Collection"} | ${catalog.settings.business_name}`;
   }, [path, catalog.settings.business_name]);
@@ -101,6 +109,19 @@ export function App() {
           </a>
         </nav>
       </header>
+      {catalog.settings.promo_banner_text && (
+        <aside className="promo-flag-bar" aria-label="Goove gift promotion">
+          <a
+            className="promo-flag"
+            href="/rewards"
+            onClick={(e) => navigate(e, "/rewards")}
+          >
+            <Gift size={20} aria-hidden="true" />
+            <span>{catalog.settings.promo_banner_text}</span>
+            <ArrowRight size={17} aria-hidden="true" />
+          </a>
+        </aside>
+      )}
       <main>
         {confirmation && (
           <section className="email-confirmation section-wrap">
@@ -194,6 +215,7 @@ export function App() {
                     key={bag.id}
                     bag={bag}
                     phone={catalog.settings.whatsapp_number}
+                    target={productTarget}
                   />
                 ))}
               </div>
@@ -218,15 +240,6 @@ export function App() {
           </>
         )}
       </main>
-      {!adminPage && catalog.settings.promo_banner_text && (
-        <a
-          className="promo-flag"
-          href="/rewards"
-          onClick={(e) => navigate(e, "/rewards")}
-        >
-          {catalog.settings.promo_banner_text}
-        </a>
-      )}
       {!adminPage && (
         <footer>
           <div>

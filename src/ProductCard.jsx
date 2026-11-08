@@ -4,6 +4,7 @@ import { WhatsappLogo } from "@phosphor-icons/react/dist/csr/WhatsappLogo";
 import { MagnifyingGlassPlus } from "@phosphor-icons/react/dist/csr/MagnifyingGlassPlus";
 import { Modal } from "./Modal";
 import { whatsappBagUrl } from "./api";
+import { productLink } from "./productLinks";
 
 const money = (value) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
@@ -19,12 +20,23 @@ function ProductPhoto({ src, name, ...props }) {
   );
 }
 
-export function ProductCard({ bag, phone }) {
+export function ProductCard({ bag, phone, target }) {
   const photos = (
     bag.gallery_images?.length ? bag.gallery_images : [bag.image_url]
   ).filter(Boolean);
-  const [index, setIndex] = useState(0);
-  const [quickView, setQuickView] = useState(false);
+  const requestedPhoto =
+    target?.id === bag.id
+      ? Math.min(target.photoIndex, Math.max(photos.length - 1, 0))
+      : 0;
+  const [index, setIndex] = useState(requestedPhoto);
+  const [quickView, setQuickView] = useState(
+    target?.id === bag.id && target.open,
+  );
+  useEffect(() => {
+    if (target?.id !== bag.id) return;
+    setIndex(requestedPhoto);
+    if (target.open) setQuickView(true);
+  }, [target, bag.id, requestedPhoto]);
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
   const descriptionRef = useRef(null);
@@ -47,12 +59,25 @@ export function ProductCard({ bag, phone }) {
     };
   }, [description, expanded]);
   const image = photos[index] || bag.image_url;
-  const productLink = `https://goove.vercel.app/#bag-${encodeURIComponent(bag.id)}`;
+  const itemLink = productLink(bag.id, index);
   const imageLink = image
     ? new URL(image, "https://goove.vercel.app/").href
     : "";
-  const purchaseLink = whatsappBagUrl(phone, bag.name, productLink, imageLink);
+  const purchaseLink = whatsappBagUrl(phone, bag.name, itemLink, imageLink);
   const price = Number(bag.price) > 0 ? money(bag.price) : "Price on request";
+  function closeQuickView() {
+    setQuickView(false);
+    const url = new URL(location.href);
+    if (url.searchParams.get("bag") === bag.id) {
+      url.searchParams.delete("bag");
+      url.searchParams.delete("photo");
+      history.replaceState(
+        history.state,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+    }
+  }
 
   const purchase = (
     <div className="product-purchase">
@@ -149,7 +174,7 @@ export function ProductCard({ bag, phone }) {
         <Modal
           title={bag.name}
           className="product-modal"
-          onClose={() => setQuickView(false)}
+          onClose={closeQuickView}
         >
           <div className="product-quick-view">
             <div className="product-detail-gallery">
@@ -189,7 +214,7 @@ export function ProductCard({ bag, phone }) {
                 </p>
               ) : null}
               {purchase}
-              <a className="product-permalink" href={productLink}>
+              <a className="product-permalink" href={itemLink}>
                 Link to this bag <ArrowRight size={14} aria-hidden="true" />
               </a>
             </div>

@@ -18,9 +18,12 @@ photography on the right; stack on mobile. Heading: “Elevate Your Elegance”.
 Subtitle: “Luxury Women's Handbags with Exclusive Matching Gift”. Use Playfair
 Display headings, Inter body text, and restrained Cinzel accents. Keep product
 cards equal height with purchase actions aligned, expandable descriptions, and
-image-triggered accessible Quick View. Promotions belong in normal page flow,
-never over product content. WhatsApp inquiries must include the canonical product
-link and the direct URL of the exact photo currently selected. Show only verified
+image-triggered accessible Quick View. Keep the gift promotion visible across
+routes and scrolling as an animated ribbon in a sticky top strip, with reduced
+motion support and no obstruction of product actions. Descriptions must follow
+product names immediately, without reserved extra title lines. WhatsApp inquiries
+must include a canonical link that opens the exact bag and selected photo in
+Quick View, plus the direct public image URL. Show only verified
 owner-entered specifications; never invent materials or dimensions.
 Keep the hero near its previous 360–380px desktop height (180px image on mobile),
 with a dense collection of five columns on wide screens and two on phones.
