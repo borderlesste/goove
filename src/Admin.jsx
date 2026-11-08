@@ -1,3 +1,4 @@
+import { productCategory } from "./catalog";
 import { TranslationFields } from "./TranslationFields";
 import React, { useEffect, useRef, useState } from "react";
 import { callApi, supabase, configured } from "./api";
@@ -370,21 +371,23 @@ export function Admin({ onCatalogChange }) {
         </button>
       </div>
       <div className="admin-tabs" role="tablist">
-        {["Claims", "Handbags", "Gifts", "Codes", "Settings"].map((t) => (
-          <button
-            role="tab"
-            aria-selected={tab === t}
-            className={tab === t ? "active" : ""}
-            key={t}
-            onClick={() => {
-              setTab(t);
-              setEditing(null);
-              setNotice("");
-            }}
-          >
-            {t}
-          </button>
-        ))}
+        {["Claims", "Handbags", "Watches", "Gifts", "Codes", "Settings"].map(
+          (t) => (
+            <button
+              role="tab"
+              aria-selected={tab === t}
+              className={tab === t ? "active" : ""}
+              key={t}
+              onClick={() => {
+                setTab(t);
+                setEditing(null);
+                setNotice("");
+              }}
+            >
+              {t}
+            </button>
+          ),
+        )}
       </div>
       {error && (
         <p role="alert" className="error">
@@ -458,16 +461,23 @@ export function Admin({ onCatalogChange }) {
           )}
         </>
       )}
-      {["Handbags", "Gifts"].includes(tab) && (
+      {["Handbags", "Watches", "Gifts"].includes(tab) && (
         <>
           <div className="admin-toolbar">
             <h3>
-              {tab === "Handbags" ? "Your collection" : "Available gifts"}
+              {tab === "Gifts"
+                ? "Available gifts"
+                : tab === "Watches"
+                  ? "Your watches"
+                  : "Your handbags"}
             </h3>
             <button
               className="secondary small"
               onClick={() =>
                 setEditing({
+                  category: tab === "Watches" ? "watch" : "handbag",
+                  audience: "women",
+                  featured: false,
                   name: "",
                   description: "",
                   image_url: "",
@@ -480,7 +490,12 @@ export function Admin({ onCatalogChange }) {
                 })
               }
             >
-              <Plus /> Add {tab === "Handbags" ? "handbag" : "gift"}
+              <Plus /> Add{" "}
+              {tab === "Gifts"
+                ? "gift"
+                : tab === "Watches"
+                  ? "watch"
+                  : "handbag"}
             </button>
           </div>
           {editing ? (
@@ -492,7 +507,7 @@ export function Admin({ onCatalogChange }) {
               onSave={async (item) => {
                 if (
                   await act("admin_save", {
-                    table: tab === "Handbags" ? "handbags" : "gift_types",
+                    table: tab === "Gifts" ? "gift_types" : "handbags",
                     item,
                   })
                 )
@@ -502,20 +517,33 @@ export function Admin({ onCatalogChange }) {
             />
           ) : (
             <div className="admin-rows">
-              {(tab === "Handbags" ? data.handbags : data.gifts).map((b) => (
+              {(tab === "Gifts"
+                ? data.gifts
+                : data.handbags.filter(
+                    (product) =>
+                      productCategory(product) ===
+                      (tab === "Watches" ? "watch" : "handbag"),
+                  )
+              ).map((b) => (
                 <article className="catalog-row" key={b.id}>
                   {b.image_url && <img src={b.image_url} alt="" />}
                   <div>
                     <strong>{b.name}</strong>
                     <p>{b.description}</p>
+                    {tab !== "Gifts" && (
+                      <small>
+                        {b.audience === "men" ? "Men" : "Women"} ·{" "}
+                        {b.featured ? "Featured on home" : "Collection only"}
+                      </small>
+                    )}
                     <small>
-                      {tab === "Handbags"
+                      {tab !== "Gifts"
                         ? Number(b.price) > 0
                           ? "Price " + money(b.price)
                           : "Price not set"
                         : `${b.gallery_images?.length || 0} gallery photos`}
                     </small>
-                    {tab === "Handbags" && (
+                    {tab !== "Gifts" && (
                       <>
                         <small
                           className={
@@ -562,7 +590,7 @@ export function Admin({ onCatalogChange }) {
                     <button className="quiet" onClick={() => setEditing(b)}>
                       Edit
                     </button>
-                    {tab === "Handbags" && (
+                    {tab !== "Gifts" && (
                       <button
                         className="quiet"
                         disabled={busy}
@@ -786,6 +814,9 @@ export function Admin({ onCatalogChange }) {
 function Editor({ item, type, busy, onSave, onCancel, onError }) {
   const [draft, setDraft] = useState(() => ({
       ...item,
+      category: item.category || (type === "Watches" ? "watch" : "handbag"),
+      audience: item.audience || "women",
+      featured: item.featured === true,
       gallery_images:
         item.gallery_images || (item.image_url ? [item.image_url] : []),
     })),
@@ -855,6 +886,45 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
         onSave({ ...draft, image_url: draft.gallery_images[0] });
       }}
     >
+      {type !== "Gifts" && (
+        <fieldset className="product-placement">
+          <legend>Collection & home page</legend>
+          <label>
+            Product collection
+            <select
+              aria-label="Product collection"
+              value={draft.category}
+              onChange={(e) => set("category", e.target.value)}
+            >
+              <option value="handbag">Handbags</option>
+              <option value="watch">Watches</option>
+            </select>
+          </label>
+          <label>
+            Collection audience
+            <select
+              aria-label="Collection audience"
+              value={draft.audience}
+              onChange={(e) => set("audience", e.target.value)}
+            >
+              <option value="women">Women</option>
+              <option value="men">Men</option>
+            </select>
+          </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={draft.featured}
+              onChange={(e) => set("featured", e.target.checked)}
+            />{" "}
+            Feature on home page
+          </label>
+          <p className="fine">
+            New products appear in their collection. Only selected products
+            appear on the home page.
+          </p>
+        </fieldset>
+      )}
       <label>
         Name
         <input
@@ -879,13 +949,13 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
         fields={[
           { key: "name", label: "Name", max: 100 },
           { key: "description", label: "Description", max: 500 },
-          ...(type === "Handbags"
+          ...(type !== "Gifts"
             ? [{ key: "specifications", label: "Specifications", max: 1500 }]
             : []),
         ]}
       />
       <>
-        {type === "Handbags" && (
+        {type !== "Gifts" && (
           <label>
             Specifications (optional)
             <textarea

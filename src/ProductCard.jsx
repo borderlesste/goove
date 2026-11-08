@@ -25,6 +25,7 @@ function ProductPhoto({ src, name, ...props }) {
 
 export function ProductCard({ bag, phone, target }) {
   const { t, language } = useLanguage();
+  const isWatch = bag.category === "watch";
   const photos = (
     bag.gallery_images?.length ? bag.gallery_images : [bag.image_url]
   ).filter(Boolean);
@@ -63,7 +64,7 @@ export function ProductCard({ bag, phone, target }) {
     };
   }, [description, expanded]);
   const image = photos[index] || bag.image_url;
-  const itemLink = productLink(bag.id, index);
+  const itemLink = productLink(bag.id, index, bag.category);
   const imageLink = image
     ? new URL(image, "https://goove.vercel.app/").href
     : "";
@@ -94,7 +95,7 @@ export function ProductCard({ bag, phone, target }) {
           rel="noopener noreferrer"
         >
           <WhatsappLogo size={19} aria-hidden="true" />
-          {t("BUY THIS BAG")}
+          {t(isWatch ? "BUY THIS WATCH" : "BUY THIS BAG")}
         </a>
       ) : (
         <span className="product-unavailable">
@@ -247,7 +248,7 @@ export function ProductCard({ bag, phone, target }) {
               ) : null}
               {purchase}
               <a className="product-permalink" href={itemLink}>
-                {t("Link to this bag")}
+                {t(isWatch ? "Link to this watch" : "Link to this bag")}
                 <ArrowRight size={14} aria-hidden="true" />
               </a>
             </div>

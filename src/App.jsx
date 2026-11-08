@@ -1,3 +1,5 @@
+import { CollectionPage } from "./CollectionPage";
+import { featuredProducts } from "./catalog";
 import { LanguageSelector, useLanguage, localizedContent } from "./i18n";
 import React, {
   lazy,
@@ -99,15 +101,26 @@ export function App() {
       );
   };
   const rewards = path === "/rewards",
-    adminPage = path === "/admin";
+    adminPage = path === "/admin",
+    collectionPage = path === "/watches" || path === "/handbags";
+  const homeProducts = featuredProducts(catalog.handbags);
+  if (
+    productTarget &&
+    !homeProducts.some((product) => product.id === productTarget.id)
+  ) {
+    const selected = catalog.handbags.find(
+      (product) => product.id === productTarget.id,
+    );
+    if (selected) homeProducts.push(selected);
+  }
   useEffect(() => {
-    if (path !== "/" || loading || !productTarget) return;
+    if (adminPage || rewards || loading || !productTarget) return;
     document
       .getElementById(`bag-${productTarget.id}`)
       ?.scrollIntoView({ block: "center" });
   }, [path, loading, catalog.handbags, productTarget]);
   useEffect(() => {
-    document.title = `${rewards ? t("Exclusive Gifts & Rewards") : adminPage ? "Goove Studio" : t("HANDBAG COLLECTION")} | ${catalog.settings.business_name}`;
+    document.title = `${rewards ? t("Exclusive Gifts & Rewards") : adminPage ? "Goove Studio" : path === "/watches" ? t("Watches") : path === "/handbags" ? t("Handbags") : t("WATCHES & HANDBAGS")} | ${catalog.settings.business_name}`;
   }, [path, catalog.settings.business_name, language]);
   return (
     <>
@@ -119,16 +132,30 @@ export function App() {
           aria-label={t("Goove home")}
         >
           {catalog.settings.business_name}
-          <span>{t("HANDBAG COLLECTION")}</span>
+          <span>{t("WATCHES & HANDBAGS")}</span>
         </a>
         <div className="header-controls">
           <nav aria-label={t("Main navigation")}>
             <a
               href="/"
-              aria-current={!rewards && !adminPage ? "page" : undefined}
+              aria-current={path === "/" ? "page" : undefined}
               onClick={(e) => navigate(e, "/")}
             >
-              {t("Collection")}
+              {t("Home")}
+            </a>
+            <a
+              href="/watches"
+              aria-current={path === "/watches" ? "page" : undefined}
+              onClick={(e) => navigate(e, "/watches")}
+            >
+              {t("Watches")}
+            </a>
+            <a
+              href="/handbags"
+              aria-current={path === "/handbags" ? "page" : undefined}
+              onClick={(e) => navigate(e, "/handbags")}
+            >
+              {t("Handbags")}
             </a>
             <a
               href="/rewards"
@@ -213,6 +240,12 @@ export function App() {
           </div>
         ) : rewards ? (
           <Rewards catalog={catalog} />
+        ) : collectionPage ? (
+          <CollectionPage
+            catalog={catalog}
+            category={path === "/watches" ? "watch" : "handbag"}
+            target={productTarget}
+          />
         ) : (
           <>
             <section className="hero" aria-labelledby="hero-heading">
@@ -246,7 +279,7 @@ export function App() {
                 <img
                   className="hero-image"
                   src={catalog.settings.hero_image_url}
-                  alt={t("Handbag featured by Goove")}
+                  alt={t("Goove collection campaign")}
                   fetchPriority="high"
                 />
               </div>
@@ -259,16 +292,32 @@ export function App() {
               <div className="section-heading">
                 <p className="eyebrow">{t("THE COLLECTION")}</p>
                 <h2 id="collection-heading">
-                  {t("Handbags for every chapter.")}
+                  {t("Featured watches & handbags.")}
                 </h2>
                 <p>
                   {t(
-                    "Timeless style, distinctive character, and a little more to look forward to.",
+                    "Women’s watches lead our collection, complemented by select men’s watches and distinctive handbags.",
                   )}
                 </p>
               </div>
+              <div className="collection-links">
+                <a
+                  className="text-link"
+                  href="/watches"
+                  onClick={(e) => navigate(e, "/watches")}
+                >
+                  {t("Explore watches")} <ArrowRight size={18} />
+                </a>
+                <a
+                  className="text-link"
+                  href="/handbags"
+                  onClick={(e) => navigate(e, "/handbags")}
+                >
+                  {t("Explore handbags")} <ArrowRight size={18} />
+                </a>
+              </div>
               <div className="bag-grid">
-                {catalog.handbags.map((bag) => (
+                {homeProducts.map((bag) => (
                   <ProductCard
                     key={bag.id}
                     bag={bag}
@@ -277,7 +326,7 @@ export function App() {
                   />
                 ))}
               </div>
-              {!catalog.handbags.length && (
+              {!homeProducts.length && (
                 <p className="empty">
                   {t("Our next collection is on its way.")}
                 </p>
@@ -308,7 +357,7 @@ export function App() {
             <span className="footer-brand">
               {catalog.settings.business_name}
             </span>
-            <p>{t("Beautiful bags. Thoughtful rewards.")}</p>
+            <p>{t("Beautiful watches and handbags. Thoughtful rewards.")}</p>
           </div>
           {(catalog.settings.public_phone ||
             catalog.settings.public_email ||
@@ -340,9 +389,9 @@ export function App() {
             </div>
           )}
           <div className="footer-note">
-            {t("In stock bags can be ordered on WhatsApp.")}
+            {t("Order available watches and handbags on WhatsApp.")}
             <br />
-            {t("Choose a bag marked available to order.")}
+            {t("Choose an item marked available to order.")}
           </div>
           <a
             className="quiet"
@@ -544,7 +593,7 @@ function Rewards({ catalog }) {
         <h1>{t("Exclusive Gifts & Rewards")}</h1>
         <p className="welcome">
           {t(
-            "Thank you for choosing our handbag collection! Enter the one-time access code from our team to view the available promo codes.",
+            "Thank you for choosing Goove watches and handbags! Enter the one-time access code from our team to view the available promo codes.",
           )}
         </p>
         <button className="rewards-start" onClick={unlock}>

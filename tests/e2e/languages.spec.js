@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 const bag = {
+  featured: true,
   id: "bag-test",
   name: "Original bag",
   description: "Original description",

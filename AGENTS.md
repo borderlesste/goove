@@ -15,7 +15,7 @@ Show success only after a confirmed identity is verified by Supabase Auth.
 
 Storefront design: use a compact split hero with text on the left and proportional
 photography on the right; stack on mobile. Heading: “Elevate Your Elegance”.
-Subtitle: “Luxury Women's Handbags with Exclusive Matching Gift”. Use Playfair
+Subtitle: “Women’s watches and handbags, with select men’s watches.” Use Playfair
 Display headings, Inter body text, and restrained Cinzel accents. Keep product
 cards equal height with purchase actions aligned, expandable descriptions, and
 image-triggered accessible Quick View. Keep the gift promotion visible across
@@ -84,3 +84,12 @@ with a compact Read more/Read less control only when text overflows. Keep the
 price within 4px of the preview/control and avoid reserved hint space. Catalog
 descriptions must have saved French, Haitian Creole and Spanish translations;
 use the existing Admin translation fields for new or edited descriptions.
+
+Goove sells handbags and watches, led by women’s watches with select men’s styles.
+Public routes are / (curated home), /watches (women first, then men), /handbags
+(full handbag catalog), and /rewards. Admin has separate Handbags and Watches
+sections. Product category, audience and an explicit Feature on home page control
+use the existing product storage and preserve IDs/gallery/order links. New products
+are not featured by default. Shared links must open an exact item even when it is
+not featured. Never list reward gifts as products without an owner-entered price.
+Maintain mixed watches/handbags copy in all four supported languages.

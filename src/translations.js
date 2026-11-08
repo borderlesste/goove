@@ -1,5 +1,112 @@
 // English source copy, followed by French, Haitian Creole, and Spanish.
 export const translations = {
+  "WATCHES & HANDBAGS": [
+    "MONTRES ET SACS",
+    "MONT AK VALIZ",
+    "RELOJES Y BOLSOS",
+  ],
+  Home: ["Accueil", "Akèy", "Inicio"],
+  Watches: ["Montres", "Mont", "Relojes"],
+  Handbags: ["Sacs à main", "Valiz", "Bolsos"],
+  "Watches for your signature style.": [
+    "Des montres à votre image.",
+    "Mont pou estil pa ou.",
+    "Relojes para tu estilo personal.",
+  ],
+  "Women’s watches": [
+    "Montres pour femmes",
+    "Mont pou fanm",
+    "Relojes para mujer",
+  ],
+  "Select men’s watches": [
+    "Une sélection de montres pour hommes",
+    "Yon seleksyon mont pou gason",
+    "Selección de relojes para hombre",
+  ],
+  "Discover women’s watches at the heart of our collection, alongside select men’s styles.":
+    [
+      "Découvrez nos montres pour femmes, au cœur de notre collection, ainsi qu’une sélection de modèles pour hommes.",
+      "Dekouvri mont pou fanm ki nan kè koleksyon nou an, ansanm ak kèk modèl nou chwazi pou gason.",
+      "Descubre los relojes para mujer que protagonizan nuestra colección, junto con una selección de modelos para hombre.",
+    ],
+  "Explore our handbag collection, chosen to complement your style and your favorite watch.":
+    [
+      "Découvrez nos sacs à main, choisis pour compléter votre style et votre montre préférée.",
+      "Dekouvri koleksyon valiz nou an, nou chwazi pou konplete estil ou ak mont ou pi renmen an.",
+      "Explora nuestros bolsos, elegidos para complementar tu estilo y tu reloj favorito.",
+    ],
+  "New styles are on their way. Contact Goove for current availability.": [
+    "De nouveaux modèles arrivent bientôt. Contactez Goove pour connaître les disponibilités.",
+    "Nouvo modèl ap vini. Kontakte Goove pou konnen sa ki disponib kounye a.",
+    "Pronto llegarán nuevos modelos. Contacta con Goove para consultar la disponibilidad.",
+  ],
+  "Explore watches": [
+    "Découvrir les montres",
+    "Dekouvri mont yo",
+    "Explorar relojes",
+  ],
+  "Explore handbags": [
+    "Découvrir les sacs",
+    "Dekouvri valiz yo",
+    "Explorar bolsos",
+  ],
+  "Featured watches & handbags.": [
+    "Notre sélection de montres et de sacs.",
+    "Mont ak valiz nou chwazi pou ou.",
+    "Nuestra selección de relojes y bolsos.",
+  ],
+  "Women’s watches lead our collection, complemented by select men’s watches and distinctive handbags.":
+    [
+      "Les montres pour femmes sont au cœur de notre collection, accompagnées d’une sélection de montres pour hommes et de sacs de caractère.",
+      "Mont pou fanm se prensipal koleksyon nou an, ak kèk mont nou chwazi pou gason ansanm ak bèl valiz espesyal.",
+      "Los relojes para mujer protagonizan nuestra colección, acompañados de selectos relojes para hombre y bolsos con personalidad.",
+    ],
+  "Women’s watches and handbags, with select men’s watches.": [
+    "Montres et sacs pour femmes, avec une sélection de montres pour hommes.",
+    "Mont ak valiz pou fanm, ak kèk mont nou chwazi pou gason.",
+    "Relojes y bolsos para mujer, con una selección de relojes para hombre.",
+  ],
+  "Discover watches, handbags & exclusive rewards": [
+    "Découvrez montres, sacs et récompenses exclusives",
+    "Dekouvri mont, valiz ak rekonpans eksklizif",
+    "Descubre relojes, bolsos y recompensas exclusivas",
+  ],
+  "Goove collection campaign": [
+    "La collection Goove",
+    "Koleksyon Goove la",
+    "La colección Goove",
+  ],
+  "Beautiful watches and handbags. Thoughtful rewards.": [
+    "De belles montres et de beaux sacs. De belles attentions.",
+    "Bèl mont ak valiz. Bèl rekonpans.",
+    "Relojes y bolsos hermosos. Recompensas especiales.",
+  ],
+  "Order available watches and handbags on WhatsApp.": [
+    "Commandez les montres et sacs disponibles sur WhatsApp.",
+    "Kòmande mont ak valiz ki disponib yo sou WhatsApp.",
+    "Pide los relojes y bolsos disponibles por WhatsApp.",
+  ],
+  "Choose an item marked available to order.": [
+    "Choisissez un article disponible à la commande.",
+    "Chwazi yon atik ki make disponib pou kòmande.",
+    "Elige un artículo disponible para pedir.",
+  ],
+  "Thank you for choosing Goove watches and handbags! Enter the one-time access code from our team to view the available promo codes.":
+    [
+      "Merci d’avoir choisi les montres et sacs Goove ! Saisissez le code d’accès à usage unique de notre équipe pour voir les codes promotionnels disponibles.",
+      "Mèsi paske ou chwazi mont ak valiz Goove yo! Antre kòd aksè ekip nou an ba ou a, ki sèvi yon sèl fwa, pou wè kòd pwomosyon ki disponib yo.",
+      "¡Gracias por elegir los relojes y bolsos Goove! Introduce el código de acceso de un solo uso de nuestro equipo para ver las promociones disponibles.",
+    ],
+  "BUY THIS WATCH": [
+    "ACHETER CETTE MONTRE",
+    "ACHTE MONT SA A",
+    "COMPRAR ESTE RELOJ",
+  ],
+  "Link to this watch": [
+    "Lien vers cette montre",
+    "Lyen pou mont sa a",
+    "Enlace a este reloj",
+  ],
   "This access code is invalid or unavailable.": [
     "Ce code d’accès est invalide ou indisponible.",
     "Kòd aksè sa a pa valab oswa li pa disponib.",

@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
+import { productFields } from "../_shared/product.ts";
 import { validateTranslations } from "../_shared/translations.ts";
 import { HttpError, readJsonBody } from "../_shared/http.ts";
 import { authorizeOwner } from "../_shared/owner.ts";
@@ -356,6 +357,7 @@ Deno.serve(async (req) => {
         throw Error("Add between 1 and 3 uploaded photos for each item.");
       if (saveGallery) item.image_url = photos[0];
       if (body.table === "handbags") {
+        Object.assign(item, productFields(i));
         if (i.specifications !== undefined) {
           if (
             typeof i.specifications !== "string" ||
@@ -369,7 +371,7 @@ Deno.serve(async (req) => {
         const price =
           i.price === "" || i.price == null ? null : Number(i.price);
         if (price === null || !Number.isFinite(price) || price <= 0)
-          throw Error("Enter a price greater than zero for each handbag.");
+          throw Error("Enter a price greater than zero for each product.");
         item.price = price;
         item.display_order = Number.isInteger(i.display_order)
           ? i.display_order

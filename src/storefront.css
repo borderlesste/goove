@@ -768,3 +768,62 @@ dialog.product-modal {
 .translation-fields legend {
   padding: 0 8px;
 }
+
+.collection-intro {
+  padding-top: 40px;
+  padding-bottom: 12px;
+  text-align: center;
+}
+.collection-intro h1 {
+  font-size: clamp(36px, 4.5vw, 60px);
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin: 14px 0;
+}
+.collection-intro > p:last-child {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.collection-links,
+.collection-crosslink {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  margin-bottom: 24px;
+}
+.collection-crosslink {
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+.collection-crosslink a {
+  border-bottom: 1px solid var(--gold);
+  padding: 8px 0;
+}
+.product-placement {
+  min-width: 0;
+  border: 1px solid var(--line);
+  padding: 12px;
+  margin-bottom: 20px;
+}
+.site-header nav {
+  gap: 20px;
+  flex-wrap: wrap;
+}
+@media (max-width: 1250px) {
+  .wordmark span {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .site-header nav {
+    gap: 4px 14px;
+  }
+  .site-header {
+    min-height: 104px;
+  }
+}
+
+.collection .empty {
+  padding: 16px 0 24px;
+}

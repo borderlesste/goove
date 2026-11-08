@@ -4,6 +4,7 @@ const longDescription =
   "A thoughtfully designed handbag for your everyday essentials. ".repeat(8);
 const bags = [
   {
+    featured: true,
     id: "signature",
     name: "The Signature",
     description: longDescription,
@@ -14,6 +15,7 @@ const bags = [
     specifications: "Material: owner-confirmed sample\nDimensions: 30 × 20 cm",
   },
   {
+    featured: true,
     id: "shoulder",
     name: "The Shoulder",
     description: "Polished and versatile.",
@@ -22,6 +24,7 @@ const bags = [
     in_stock: true,
   },
   {
+    featured: true,
     id: "woven",
     name: "The Woven with an exceptionally long product name for a considered wardrobe",
     description:
@@ -31,6 +34,7 @@ const bags = [
     in_stock: false,
   },
   {
+    featured: true,
     id: "mini",
     name: "The Mini",
     description: "Compact and refined.",
@@ -418,6 +422,6 @@ test("three-photo galleries open the shared photo and cycle with previous and ne
   await page.locator(".promo-flag").click();
   await expect(page).toHaveURL(/\/#collection$/);
   await expect(
-    page.getByRole("heading", { name: "Handbags for every chapter." }),
+    page.getByRole("heading", { name: "Featured watches & handbags." }),
   ).toBeInViewport();
 });

@@ -36,6 +36,24 @@ reward lifecycle and request validation tests, then runs Chromium tests at deskt
 and mobile sizes. Browser tests mock Supabase and WhatsApp and never create real
 reservations. CI runs these checks on every push to `main`.
 
+## Product collections and home curation
+
+The public navigation links to Home, Watches (`/watches`), Handbags (`/handbags`)
+and Gifts & Rewards. Watches lead with women’s styles and a separate selection
+of men’s watches. Collection pages show all products of their category; the home
+page shows only products explicitly marked as featured. New products default to
+collection-only placement.
+
+In **Admin → Handbags/Watches → Add/Edit**, choose the product collection,
+Women/Men audience, and **Feature on home page**. Add a price and 1–3 photos as
+before. Existing IDs, galleries, stock controls and shared links are preserved;
+the existing `handbags` storage table now carries category/audience/featured
+fields for both types of product. Reward gifts remain separate from sale stock.
+
+The initial migration selects six existing products for the home page. Reapplying
+it does not reset owner curation. Existing product-specific descriptions remain
+unchanged; shared copy now covers watches and handbags in all four languages.
+
 ## Storefront
 
 The hero uses Playfair Display with Inter body text and Cinzel accents. The

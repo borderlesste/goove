@@ -1,7 +1,8 @@
 const storefront = "https://goove.vercel.app/";
 
-export function productLink(id, photoIndex = 0) {
+export function productLink(id, photoIndex = 0, category = "handbag") {
   const url = new URL(storefront);
+  if (category === "watch") url.pathname = "/watches";
   url.searchParams.set("bag", id);
   url.searchParams.set("photo", String(photoIndex + 1));
   url.hash = `bag-${encodeURIComponent(id)}`;
