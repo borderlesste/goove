@@ -921,11 +921,11 @@ button:hover,
   top: 50%;
   z-index: 1;
   transform: translateY(-50%);
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
-  min-height: 38px;
-  padding: 8px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 6px;
   border: 0;
   border-radius: 50%;
   background: #fbf9f5e8;
@@ -1323,18 +1323,14 @@ footer p,
 .banner-preview {
   display: block;
   width: min(100%, 560px);
-  max-height: 300px;
+  aspect-ratio: 8 / 5;
   margin: 14px 0;
-  object-fit: cover;
+  object-fit: contain;
+  background: #f0eee7;
   border: 1px solid var(--line);
 }
 footer {
   padding-bottom: 90px;
-}
-@media (max-width: 600px) {
-  .banner-preview {
-    max-height: 220px;
-  }
 }
 
 .stock-status {

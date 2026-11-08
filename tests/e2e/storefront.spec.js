@@ -106,7 +106,7 @@ test("hero uses the requested copy and separates image, text, and CTA", async ({
   const subtitle = await page.locator(".hero-subtitle").boundingBox();
   const image = await page.locator(".hero-image").boundingBox();
   const copy = await page.locator(".hero-copy").boundingBox();
-  expect(image.height).toBeLessThanOrEqual(isMobile ? 180 : 380);
+  expect(image.height).toBeLessThanOrEqual(isMobile ? 250 : 380);
   expect(subtitle.y).toBeGreaterThan(heading.y + heading.height);
   if (isMobile)
     expect(image.y).toBeGreaterThanOrEqual(copy.y + copy.height - 1);

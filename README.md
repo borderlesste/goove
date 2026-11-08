@@ -42,6 +42,20 @@ The hero uses Playfair Display with Inter body text and Cinzel accents. The
 collection keeps equal-height cards and aligned purchase actions, including when
 descriptions expand. Selecting a product image opens an accessible Quick View
 with the original gallery photos, full description, availability, and price.
+Photos have no Quick View badge; compact 30px arrows keep the image clear.
+
+The home banner uses an 8:5 frame and fits the entire photo without cropping.
+Recommended upload: 1600 × 1000 pixels, JPG/PNG/WebP under 5 MB. Other aspect
+ratios are accepted with space around the image. Admin → Settings previews the
+same frame.
+
+The header language selector offers English, French, Haitian Creole and Spanish
+and remembers the visitor’s choice. Shop controls and the Rewards flow are
+translated. Under **Admin → Handbags/Gifts → Edit → Language translations**,
+owners can translate names, descriptions and handbag specifications. Under
+**Admin → Settings → Language translations**, they can translate the banner and
+promo flag. Empty translations use the original copy. Owner Studio remains in
+English; language switching never changes stored product IDs, codes or photos.
 
 Owners can add verified specifications under **Admin → Handbags → Edit →
 Specifications** (up to 1,500 characters). Product descriptions can include

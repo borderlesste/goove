@@ -1,6 +1,8 @@
+import { useLanguage } from "./i18n";
 import React, { useEffect, useId, useRef } from "react";
 import { X } from "@phosphor-icons/react/dist/csr/X";
 export function Modal({ title, onClose, children, className = "" }) {
+  const { t } = useLanguage();
   const ref = useRef();
   const titleId = useId();
   useEffect(() => {
@@ -36,7 +38,11 @@ export function Modal({ title, onClose, children, className = "" }) {
           onClose();
       }}
     >
-      <button className="close" aria-label="Close dialog" onClick={onClose}>
+      <button
+        className="close"
+        aria-label={t("Close dialog")}
+        onClick={onClose}
+      >
         <X size={22} />
       </button>
       <h2 id={titleId}>{title}</h2>

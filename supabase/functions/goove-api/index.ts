@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.117.3";
+import { validateTranslations } from "../_shared/translations.ts";
 import { HttpError, readJsonBody } from "../_shared/http.ts";
 import { authorizeOwner } from "../_shared/owner.ts";
 const url = Deno.env.get("SUPABASE_URL")!;
@@ -105,7 +106,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST")
     return reply({ error: "Method not allowed." }, 405);
   try {
-    const body = await readJsonBody(req);
+    const body = await readJsonBody(req, 64_000);
     const action = body.action;
     if (action === "catalog") {
       const [handbags, gifts, s] = await Promise.all([
@@ -136,6 +137,7 @@ Deno.serve(async (req) => {
           social_links: s.social_links,
           promotion_mode: s.promotion_mode,
           promotion_enabled: s.promotion_enabled,
+          translations: s.translations,
           hero_heading: s.hero_heading,
           hero_description: s.hero_description,
           hero_cta_text: s.hero_cta_text,
@@ -332,6 +334,12 @@ Deno.serve(async (req) => {
         description: text(i.description, 500),
         image_url: image || null,
       };
+      if (i.translations !== undefined)
+        item.translations = validateTranslations(i.translations, {
+          name: 100,
+          description: 500,
+          ...(body.table === "handbags" ? { specifications: 1500 } : {}),
+        });
       const photos = Array.isArray(i.gallery_images) ? i.gallery_images : [];
       const saveGallery = !i.id || photos.length > 0;
       if (
@@ -530,6 +538,16 @@ Deno.serve(async (req) => {
         await db
           .from("goove_settings")
           .update({
+            ...(s.translations !== undefined
+              ? {
+                  translations: validateTranslations(s.translations, {
+                    hero_heading: 120,
+                    hero_description: 400,
+                    hero_cta_text: 50,
+                    promo_banner_text: 150,
+                  }),
+                }
+              : {}),
             business_name: text(s.business_name),
             whatsapp_number: s.whatsapp_number,
             public_phone: publicPhone,

@@ -1,27 +1,30 @@
+import { useLanguage } from "./i18n";
 import React, { useEffect, useId, useRef, useState } from "react";
 import { ArrowRight } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { ArrowLeft } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { WhatsappLogo } from "@phosphor-icons/react/dist/csr/WhatsappLogo";
-import { MagnifyingGlassPlus } from "@phosphor-icons/react/dist/csr/MagnifyingGlassPlus";
 import { Modal } from "./Modal";
 import { whatsappBagUrl } from "./api";
 import { productLink } from "./productLinks";
 
-const money = (value) =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-    Number(value),
-  );
+const money = (value, language) =>
+  new Intl.NumberFormat(language, {
+    style: "currency",
+    currency: "USD",
+  }).format(Number(value));
 
 function ProductPhoto({ src, name, ...props }) {
+  const { t } = useLanguage();
   const [failed, setFailed] = useState(false);
   return failed || !src ? (
-    <span className="product-photo-unavailable">Photo unavailable</span>
+    <span className="product-photo-unavailable">{t("Photo unavailable")}</span>
   ) : (
     <img src={src} alt={name} onError={() => setFailed(true)} {...props} />
   );
 }
 
 export function ProductCard({ bag, phone, target }) {
+  const { t, language } = useLanguage();
   const photos = (
     bag.gallery_images?.length ? bag.gallery_images : [bag.image_url]
   ).filter(Boolean);
@@ -65,7 +68,8 @@ export function ProductCard({ bag, phone, target }) {
     ? new URL(image, "https://goove.vercel.app/").href
     : "";
   const purchaseLink = whatsappBagUrl(phone, bag.name, itemLink, imageLink);
-  const price = Number(bag.price) > 0 ? money(bag.price) : "Price on request";
+  const price =
+    Number(bag.price) > 0 ? money(bag.price, language) : t("Price on request");
   function closeQuickView() {
     setQuickView(false);
     const url = new URL(location.href);
@@ -89,17 +93,20 @@ export function ProductCard({ bag, phone, target }) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <WhatsappLogo size={19} aria-hidden="true" /> BUY THIS BAG
+          <WhatsappLogo size={19} aria-hidden="true" />
+          {t("BUY THIS BAG")}
         </a>
       ) : (
         <span className="product-unavailable">
-          {bag.in_stock === false ? "OUT OF STOCK" : "INQUIRIES UNAVAILABLE"}
+          {bag.in_stock === false
+            ? t("OUT OF STOCK")
+            : t("INQUIRIES UNAVAILABLE")}
         </span>
       )}
       <p className="buy-hint">
         {bag.in_stock === false
-          ? "Ask us about future availability."
-          : "Personal assistance on WhatsApp"}
+          ? t("Ask us about future availability.")
+          : t("Personal assistance on WhatsApp")}
       </p>
     </div>
   );
@@ -115,7 +122,10 @@ export function ProductCard({ bag, phone, target }) {
           <button
             key={src + i}
             type="button"
-            aria-label={`Show photo ${i + 1} of ${bag.name}`}
+            aria-label={t("Show photo {number} of {name}", {
+              number: i + 1,
+              name: bag.name,
+            })}
             aria-pressed={i === index}
             onClick={() => setIndex(i)}
           >
@@ -128,17 +138,17 @@ export function ProductCard({ bag, phone, target }) {
     <>
       <button
         className="product-photo-arrow previous"
-        aria-label={`Previous photo of ${bag.name}`}
+        aria-label={t("Previous photo of {name}", { name: bag.name })}
         onClick={() => setIndex((i) => (i - 1 + photos.length) % photos.length)}
       >
-        <ArrowLeft size={19} aria-hidden="true" />
+        <ArrowLeft size={14} aria-hidden="true" />
       </button>
       <button
         className="product-photo-arrow next"
-        aria-label={`Next photo of ${bag.name}`}
+        aria-label={t("Next photo of {name}", { name: bag.name })}
         onClick={() => setIndex((i) => (i + 1) % photos.length)}
       >
-        <ArrowRight size={19} aria-hidden="true" />
+        <ArrowRight size={14} aria-hidden="true" />
       </button>
     </>
   );
@@ -148,7 +158,7 @@ export function ProductCard({ bag, phone, target }) {
       <div className="product-visual">
         <button
           className="product-image-button"
-          aria-label={`Quick view ${bag.name}`}
+          aria-label={t("Quick view {name}", { name: bag.name })}
           onClick={() => setQuickView(true)}
         >
           <ProductPhoto
@@ -159,9 +169,6 @@ export function ProductCard({ bag, phone, target }) {
             width="1024"
             height="1024"
           />
-          <span className="quick-view-label">
-            <MagnifyingGlassPlus size={17} aria-hidden="true" /> QUICK VIEW
-          </span>
         </button>
         {photoArrows}
       </div>
@@ -181,7 +188,7 @@ export function ProductCard({ bag, phone, target }) {
               aria-controls={descriptionId}
               onClick={() => setExpanded(!expanded)}
             >
-              {expanded ? "Read less" : "Read more"}{" "}
+              {expanded ? t("Read less") : t("Read more")}{" "}
               <ArrowRight size={13} aria-hidden="true" />
             </button>
           )}
@@ -215,21 +222,21 @@ export function ProductCard({ bag, phone, target }) {
               {thumbnails("quick view")}
             </div>
             <div className="product-details">
-              <p className="eyebrow">THE GOOVE COLLECTION</p>
+              <p className="eyebrow">{t("THE GOOVE COLLECTION")}</p>
               <p className="product-detail-price">{price}</p>
               <p className="product-full-description">{description}</p>
-              <h3>Specifications</h3>
+              <h3>{t("Specifications")}</h3>
               <dl className="product-specifications">
                 <div>
-                  <dt>Style</dt>
+                  <dt>{t("Style")}</dt>
                   <dd>{bag.name}</dd>
                 </div>
                 <div>
-                  <dt>Availability</dt>
+                  <dt>{t("Availability")}</dt>
                   <dd>
                     {bag.in_stock === false
-                      ? "Out of stock"
-                      : "Available to order"}
+                      ? t("Out of stock")
+                      : t("Available to order")}
                   </dd>
                 </div>
               </dl>
@@ -240,7 +247,8 @@ export function ProductCard({ bag, phone, target }) {
               ) : null}
               {purchase}
               <a className="product-permalink" href={itemLink}>
-                Link to this bag <ArrowRight size={14} aria-hidden="true" />
+                {t("Link to this bag")}
+                <ArrowRight size={14} aria-hidden="true" />
               </a>
             </div>
           </div>

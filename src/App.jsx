@@ -1,4 +1,12 @@
-import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { LanguageSelector, useLanguage, localizedContent } from "./i18n";
+import React, {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { ArrowRight } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import { ArrowLeft } from "@phosphor-icons/react/dist/csr/ArrowLeft";
 import { Check } from "@phosphor-icons/react/dist/csr/Check";
@@ -20,8 +28,9 @@ const Admin = lazy(() =>
   import("./Admin").then((module) => ({ default: module.Admin })),
 );
 export function App() {
+  const { t, language } = useLanguage();
   const [path, setPath] = useState(location.pathname),
-    [catalog, setCatalog] = useState({
+    [sourceCatalog, setCatalog] = useState({
       handbags: [],
       gifts: [],
       settings: defaultSettings,
@@ -32,6 +41,19 @@ export function App() {
     [productTarget, setProductTarget] = useState(() =>
       readProductTarget(location.href),
     );
+  const catalog = useMemo(
+    () => ({
+      ...sourceCatalog,
+      settings: localizedContent(sourceCatalog.settings, language),
+      handbags: sourceCatalog.handbags.map((item) =>
+        localizedContent(item, language),
+      ),
+      gifts: sourceCatalog.gifts.map((item) =>
+        localizedContent(item, language),
+      ),
+    }),
+    [sourceCatalog, language],
+  );
   async function refresh() {
     try {
       setCatalog(await loadCatalog());
@@ -85,8 +107,8 @@ export function App() {
       ?.scrollIntoView({ block: "center" });
   }, [path, loading, catalog.handbags, productTarget]);
   useEffect(() => {
-    document.title = `${rewards ? "Exclusive Gifts & Rewards" : adminPage ? "Goove Studio" : "Handbag Collection"} | ${catalog.settings.business_name}`;
-  }, [path, catalog.settings.business_name]);
+    document.title = `${rewards ? t("Exclusive Gifts & Rewards") : adminPage ? "Goove Studio" : t("HANDBAG COLLECTION")} | ${catalog.settings.business_name}`;
+  }, [path, catalog.settings.business_name, language]);
   return (
     <>
       <header className="site-header">
@@ -94,37 +116,43 @@ export function App() {
           href="/"
           className="wordmark"
           onClick={(e) => navigate(e, "/")}
-          aria-label="Goove home"
+          aria-label={t("Goove home")}
         >
           {catalog.settings.business_name}
-          <span>HANDBAG COLLECTION</span>
+          <span>{t("HANDBAG COLLECTION")}</span>
         </a>
-        <nav aria-label="Main navigation">
-          <a
-            href="/"
-            aria-current={!rewards && !adminPage ? "page" : undefined}
-            onClick={(e) => navigate(e, "/")}
-          >
-            Collection
-          </a>
-          <a
-            href="/rewards"
-            aria-current={rewards ? "page" : undefined}
-            onClick={(e) => navigate(e, "/rewards")}
-          >
-            Gifts & Rewards
-          </a>
-        </nav>
+        <div className="header-controls">
+          <nav aria-label={t("Main navigation")}>
+            <a
+              href="/"
+              aria-current={!rewards && !adminPage ? "page" : undefined}
+              onClick={(e) => navigate(e, "/")}
+            >
+              {t("Collection")}
+            </a>
+            <a
+              href="/rewards"
+              aria-current={rewards ? "page" : undefined}
+              onClick={(e) => navigate(e, "/rewards")}
+            >
+              {t("Gifts & Rewards")}
+            </a>
+          </nav>
+          <LanguageSelector />
+        </div>
       </header>
       {catalog.settings.promo_banner_text && (
-        <aside className="promo-flag-bar" aria-label="Goove gift promotion">
+        <aside
+          className="promo-flag-bar"
+          aria-label={t("Goove gift promotion")}
+        >
           <a
             className="promo-flag"
             href="/#collection"
             onClick={(e) => navigate(e, "/#collection")}
           >
             <Gift size={20} aria-hidden="true" />
-            <span>{catalog.settings.promo_banner_text}</span>
+            <span>{t(catalog.settings.promo_banner_text)}</span>
             <ArrowRight size={17} aria-hidden="true" />
           </a>
         </aside>
@@ -137,13 +165,19 @@ export function App() {
               role={confirmation === "confirmed" ? "status" : "alert"}
             >
               {confirmation === "confirmed"
-                ? "Your email is confirmed. Continue to owner access to manage your account."
+                ? t(
+                    "Your email is confirmed. Continue to owner access to manage your account.",
+                  )
                 : confirmation === "expired"
-                  ? "This email confirmation link has expired or has already been used. Try signing in if you have already confirmed your email; otherwise request a new confirmation link."
-                  : "We could not confirm your email. Open the latest confirmation email and try again."}
+                  ? t(
+                      "This email confirmation link has expired or has already been used. Try signing in if you have already confirmed your email; otherwise request a new confirmation link.",
+                    )
+                  : t(
+                      "We could not confirm your email. Open the latest confirmation email and try again.",
+                    )}
             </p>
             <a href="/admin" onClick={(e) => navigate(e, "/admin")}>
-              Continue to owner access{" "}
+              {t("Continue to owner access")}{" "}
               <ArrowRight size={16} aria-hidden="true" />
             </a>
           </section>
@@ -151,14 +185,15 @@ export function App() {
         {adminPage ? (
           <section className="owner-page">
             <a className="back-link" href="/" onClick={(e) => navigate(e, "/")}>
-              <ArrowLeft size={16} /> Back to the collection
+              <ArrowLeft size={16} />
+              {t("Back to the collection")}
             </a>
-            <p className="eyebrow">OWNER ACCESS</p>
-            <h1>Goove Studio</h1>
+            <p className="eyebrow">{t("OWNER ACCESS")}</p>
+            <h1>{t("Goove Studio")}</h1>
             <Suspense
               fallback={
                 <p className="owner-session" role="status">
-                  Opening Goove Studio…
+                  {t("Opening Goove Studio…")}
                 </p>
               }
             >
@@ -167,13 +202,14 @@ export function App() {
           </section>
         ) : error ? (
           <section className="empty">
-            <h1>A moment, please.</h1>
-            <p role="alert">{error}</p>
-            <button onClick={refresh}>TRY AGAIN</button>
+            <h1>{t("A moment, please.")}</h1>
+            <p role="alert">{t(error)}</p>
+            <button onClick={refresh}>{t("TRY AGAIN")}</button>
           </section>
         ) : loading ? (
           <div className="loading">
-            <SpinnerGap className="spin" /> Preparing something beautiful…
+            <SpinnerGap className="spin" />
+            {t("Preparing something beautiful…")}
           </div>
         ) : rewards ? (
           <Rewards catalog={catalog} />
@@ -181,31 +217,39 @@ export function App() {
           <>
             <section className="hero" aria-labelledby="hero-heading">
               <div className="hero-copy">
-                <p className="eyebrow">THE GOOVE COLLECTION</p>
+                <p className="eyebrow">{t("THE GOOVE COLLECTION")}</p>
                 <h1 id="hero-heading">
-                  {catalog.settings.hero_heading ||
-                    defaultSettings.hero_heading}
+                  {t(
+                    catalog.settings.hero_heading ||
+                      defaultSettings.hero_heading,
+                  )}
                 </h1>
                 <p className="hero-subtitle">
-                  {catalog.settings.hero_description ||
-                    defaultSettings.hero_description}
+                  {t(
+                    catalog.settings.hero_description ||
+                      defaultSettings.hero_description,
+                  )}
                 </p>
                 <a
                   className="button"
                   href="/rewards"
                   onClick={(e) => navigate(e, "/rewards")}
                 >
-                  {catalog.settings.hero_cta_text ||
-                    defaultSettings.hero_cta_text}{" "}
+                  {t(
+                    catalog.settings.hero_cta_text ||
+                      defaultSettings.hero_cta_text,
+                  )}{" "}
                   <ArrowRight size={22} weight="light" />
                 </a>
               </div>
-              <img
-                className="hero-image"
-                src={catalog.settings.hero_image_url}
-                alt="Handbag featured by Goove"
-                fetchPriority="high"
-              />
+              <div className="hero-photo-frame">
+                <img
+                  className="hero-image"
+                  src={catalog.settings.hero_image_url}
+                  alt={t("Handbag featured by Goove")}
+                  fetchPriority="high"
+                />
+              </div>
             </section>
             <section
               className="collection section-wrap"
@@ -213,11 +257,14 @@ export function App() {
               aria-labelledby="collection-heading"
             >
               <div className="section-heading">
-                <p className="eyebrow">THE COLLECTION</p>
-                <h2 id="collection-heading">Handbags for every chapter.</h2>
+                <p className="eyebrow">{t("THE COLLECTION")}</p>
+                <h2 id="collection-heading">
+                  {t("Handbags for every chapter.")}
+                </h2>
                 <p>
-                  Timeless style, distinctive character, and a little more to
-                  look forward to.
+                  {t(
+                    "Timeless style, distinctive character, and a little more to look forward to.",
+                  )}
                 </p>
               </div>
               <div className="bag-grid">
@@ -231,21 +278,25 @@ export function App() {
                 ))}
               </div>
               {!catalog.handbags.length && (
-                <p className="empty">Our next collection is on its way.</p>
+                <p className="empty">
+                  {t("Our next collection is on its way.")}
+                </p>
               )}
             </section>
             <section className="closing">
-              <p className="eyebrow">A LITTLE SOMETHING, JUST FOR YOU</p>
+              <p className="eyebrow">{t("A LITTLE SOMETHING, JUST FOR YOU")}</p>
               <h2>
-                A beautiful choice deserves
-                <br />a thoughtful thank-you.
+                {t("A beautiful choice deserves")}
+                <br />
+                {t("a thoughtful thank-you.")}
               </h2>
               <a
                 className="text-link"
                 href="/rewards"
                 onClick={(e) => navigate(e, "/rewards")}
               >
-                Discover your exclusive rewards <ArrowRight size={20} />
+                {t("Discover your exclusive rewards")}
+                <ArrowRight size={20} />
               </a>
             </section>
           </>
@@ -257,13 +308,13 @@ export function App() {
             <span className="footer-brand">
               {catalog.settings.business_name}
             </span>
-            <p>Beautiful bags. Thoughtful rewards.</p>
+            <p>{t("Beautiful bags. Thoughtful rewards.")}</p>
           </div>
           {(catalog.settings.public_phone ||
             catalog.settings.public_email ||
             catalog.settings.social_links?.length > 0) && (
             <div className="footer-contact">
-              <strong>Contact Goove</strong>
+              <strong>{t("Contact Goove")}</strong>
               {catalog.settings.public_phone && (
                 <a
                   href={`tel:${catalog.settings.public_phone.replace(/[^+0-9]/g, "")}`}
@@ -289,16 +340,16 @@ export function App() {
             </div>
           )}
           <div className="footer-note">
-            In stock bags can be ordered on WhatsApp.
+            {t("In stock bags can be ordered on WhatsApp.")}
             <br />
-            Choose a bag marked available to order.
+            {t("Choose a bag marked available to order.")}
           </div>
           <a
             className="quiet"
             href="/admin"
             onClick={(e) => navigate(e, "/admin")}
           >
-            Owner access
+            {t("Owner access")}
           </a>
         </footer>
       )}
@@ -306,6 +357,7 @@ export function App() {
   );
 }
 function GiftGallery({ gift }) {
+  const { t } = useLanguage();
   const photos = (
     gift.gallery_images?.length ? gift.gallery_images : [gift.image_url]
   ).filter(Boolean);
@@ -326,7 +378,7 @@ function GiftGallery({ gift }) {
         <>
           <button
             className="gallery-arrow previous"
-            aria-label={"Previous " + gift.name + " photo"}
+            aria-label={t("Previous photo of {name}", { name: gift.name })}
             onClick={() =>
               setIndex((i) => (i - 1 + photos.length) % photos.length)
             }
@@ -335,7 +387,7 @@ function GiftGallery({ gift }) {
           </button>
           <button
             className="gallery-arrow next"
-            aria-label={"Next " + gift.name + " photo"}
+            aria-label={t("Next photo of {name}", { name: gift.name })}
             onClick={() => setIndex((i) => (i + 1) % photos.length)}
           >
             <ArrowRight size={18} />
@@ -349,6 +401,7 @@ function GiftGallery({ gift }) {
   );
 }
 function Rewards({ catalog }) {
+  const { t, language } = useLanguage();
   const { gifts, settings } = catalog;
   const [opened, setOpened] = useState(false),
     [access, setAccess] = useState(""),
@@ -398,7 +451,9 @@ function Rewards({ catalog }) {
       if (result.claim) {
         setState(null);
         throw Error(
-          "This access code has already been used. Ask Goove for a new access code.",
+          t(
+            "This access code has already been used. Ask Goove for a new access code.",
+          ),
         );
       }
       setState(result);
@@ -415,13 +470,15 @@ function Rewards({ catalog }) {
     const form = e.currentTarget;
     form.elements.customer_name.setCustomValidity(
       name.trim().length < 2
-        ? "Enter a name with at least two characters."
+        ? t("Enter a name with at least two characters.")
         : "",
     );
     const digits = phone.replace(/\D/g, "").length;
     form.elements.customer_phone.setCustomValidity(
       digits < 7 || digits > 15
-        ? "Enter a phone number with 7 to 15 digits, including your country code."
+        ? t(
+            "Enter a phone number with 7 to 15 digits, including your country code.",
+          )
         : "",
     );
     if (!form.reportValidity()) return;
@@ -480,16 +537,19 @@ function Rewards({ catalog }) {
     <>
       <section className="rewards-intro section-wrap">
         <a className="back-link" href="/">
-          <ArrowLeft size={16} /> Back to the collection
+          <ArrowLeft size={16} />
+          {t("Back to the collection")}
         </a>
-        <p className="eyebrow">OUR WAY OF SAYING THANK YOU</p>
-        <h1>Exclusive Gifts & Rewards</h1>
+        <p className="eyebrow">{t("OUR WAY OF SAYING THANK YOU")}</p>
+        <h1>{t("Exclusive Gifts & Rewards")}</h1>
         <p className="welcome">
-          Thank you for choosing our handbag collection! Enter the one-time
-          access code from our team to view the available promo codes.
+          {t(
+            "Thank you for choosing our handbag collection! Enter the one-time access code from our team to view the available promo codes.",
+          )}
         </p>
         <button className="rewards-start" onClick={unlock}>
-          ENTER ACCESS CODE <ArrowRight size={20} />
+          {t("ENTER ACCESS CODE")}
+          <ArrowRight size={20} />
         </button>
       </section>
       <section className="section-wrap gifts-section">
@@ -500,13 +560,13 @@ function Rewards({ catalog }) {
                 <GiftGallery gift={g} />
               ) : (
                 <div className="discount-art">
-                  <span className="eyebrow">YOUR NEXT CHAPTER</span>
+                  <span className="eyebrow">{t("YOUR NEXT CHAPTER")}</span>
                   <span className="percent">
                     {g.discount_percent}
                     <small>%</small>
                   </span>
                   <span className="discount-caption">
-                    A little more to love.
+                    {t("A little more to love.")}
                   </span>
                 </div>
               )}
@@ -518,8 +578,9 @@ function Rewards({ catalog }) {
           ))}
         </div>
         <p className="terms">
-          Each purchase access code unlocks one promo selection. Promo codes are
-          available while supplies last.
+          {t(
+            "Each purchase access code unlocks one promo selection. Promo codes are available while supplies last.",
+          )}
         </p>
       </section>
       <section
@@ -527,22 +588,25 @@ function Rewards({ catalog }) {
         ref={panel}
         aria-labelledby="reward-heading"
       >
-        <p className="eyebrow">RESERVED FOR OUR CUSTOMERS</p>
-        <h2 id="reward-heading">Choose your promo.</h2>
+        <p className="eyebrow">{t("RESERVED FOR OUR CUSTOMERS")}</p>
+        <h2 id="reward-heading">{t("Choose your promo.")}</h2>
         <p>
-          Use your one-time access code to see all codes for active promotions.
+          {t(
+            "Use your one-time access code to see all codes for active promotions.",
+          )}
         </p>
         {!opened ? (
           <button onClick={unlock}>
-            VIEW AVAILABLE PROMO CODES <ArrowRight size={20} />
+            {t("VIEW AVAILABLE PROMO CODES")}
+            <ArrowRight size={20} />
           </button>
         ) : (
           <div className="reward-flow">
-            <ol className="steps" aria-label="Reward progress">
+            <ol className="steps" aria-label={t("Reward progress")}>
               {["Access code", "Choose promo", "WhatsApp"].map(
                 (label, index) => (
                   <li
-                    key={label}
+                    key={t(label)}
                     className={
                       index === stage ? "current" : index < stage ? "done" : ""
                     }
@@ -556,12 +620,13 @@ function Rewards({ catalog }) {
             </ol>
             {!state ? (
               <form onSubmit={verify} aria-busy={busy}>
-                <h3>Your exclusive access</h3>
+                <h3>{t("Your exclusive access")}</h3>
                 <p>
-                  Enter the access code shared by Goove. It can be used once to
-                  unlock one promo code.
+                  {t(
+                    "Enter the access code shared by Goove. It can be used once to unlock one promo code.",
+                  )}
                 </p>
-                <label htmlFor="access">Access code</label>
+                <label htmlFor="access">{t("Access code")}</label>
                 <input
                   id="access"
                   ref={accessInput}
@@ -570,7 +635,7 @@ function Rewards({ catalog }) {
                     setAccess(e.target.value.replace(/\s/g, "").toUpperCase());
                     setError("");
                   }}
-                  placeholder="Enter your access code"
+                  placeholder={t("Enter your access code")}
                   autoComplete="off"
                   spellCheck="false"
                   autoCapitalize="characters"
@@ -583,11 +648,12 @@ function Rewards({ catalog }) {
                   maxLength={100}
                 />
                 <p className="fine" id="access-help">
-                  Paste the full GOOVE- code shared by our team. Viewing the
-                  list does not use your selection.
+                  {t(
+                    "Paste the full GOOVE- code shared by our team. Viewing the list does not use your selection.",
+                  )}
                 </p>
                 <button disabled={busy}>
-                  {busy ? "CHECKING…" : "VIEW MY PROMO CODES"}{" "}
+                  {busy ? t("CHECKING…") : t("VIEW MY PROMO CODES")}{" "}
                   <LockSimple size={18} />
                 </button>
               </form>
@@ -596,20 +662,21 @@ function Rewards({ catalog }) {
                 <span className="success-icon">
                   <Check size={28} />
                 </span>
-                <p className="eyebrow">YOUR PROMO CODE</p>
+                <p className="eyebrow">{t("YOUR PROMO CODE")}</p>
                 <h3 ref={stageHeading} tabIndex={-1}>
                   {state.claim.code}
                 </h3>
                 <p>
-                  This promo code is reserved for you. If WhatsApp didn’t open
-                  earlier, enter your details below to send it now.
+                  {t(
+                    "This promo code is reserved for you. If WhatsApp didn’t open earlier, enter your details below to send it now.",
+                  )}
                 </p>
                 <form
                   className="promo-contact-form"
                   onSubmit={sendPromo}
                   aria-busy={busy}
                 >
-                  <label htmlFor="reserved-name">Name</label>
+                  <label htmlFor="reserved-name">{t("Name")}</label>
                   <input
                     id="reserved-name"
                     name="customer_name"
@@ -623,7 +690,7 @@ function Rewards({ catalog }) {
                       setName(e.target.value);
                     }}
                   />
-                  <label htmlFor="reserved-phone">Phone number</label>
+                  <label htmlFor="reserved-phone">{t("Phone number")}</label>
                   <input
                     id="reserved-phone"
                     name="customer_phone"
@@ -631,7 +698,7 @@ function Rewards({ catalog }) {
                     autoComplete="tel"
                     inputMode="tel"
                     pattern={phonePattern}
-                    title="Enter a valid phone number"
+                    title={t("Enter a valid phone number")}
                     maxLength={30}
                     required
                     value={phone}
@@ -641,33 +708,37 @@ function Rewards({ catalog }) {
                     }}
                   />
                   <p className="fine">
-                    The system selection date and time will be included in your
-                    WhatsApp message.
+                    {t(
+                      "The system selection date and time will be included in your WhatsApp message.",
+                    )}
                   </p>
                   <button disabled={busy}>
-                    CONTINUE TO WHATSAPP <WhatsappLogo size={18} />
+                    {t("CONTINUE TO WHATSAPP")}
+                    <WhatsappLogo size={18} />
                   </button>
                 </form>
               </div>
             ) : (
               <>
                 <h3 ref={stageHeading} tabIndex={-1}>
-                  Promo codes
+                  {t("Promo codes")}
                 </h3>
                 <p role="status">
-                  {availableCount}{" "}
-                  {availableCount === 1 ? "promo is" : "promos are"} available.
+                  {language === "en"
+                    ? `${availableCount} ${availableCount === 1 ? "promo is" : "promos are"} available.`
+                    : t("{count} promos available.", { count: availableCount })}
                 </p>
                 <p>
-                  Choose an available promo. After you send it, Goove replaces
-                  it with a fresh code for the next customer.
+                  {t(
+                    "Choose an available promo. After you send it, Goove replaces it with a fresh code for the next customer.",
+                  )}
                 </p>
                 <button
                   className="secondary small"
                   disabled={busy}
                   onClick={() => verify()}
                 >
-                  {busy ? "CHECKING…" : "REFRESH AVAILABLE PROMO CODES"}
+                  {busy ? t("CHECKING…") : t("REFRESH AVAILABLE PROMO CODES")}
                 </button>
                 <div className="code-grid">
                   {state.codes?.map((c, index) => (
@@ -677,13 +748,17 @@ function Rewards({ catalog }) {
                     >
                       <Gift size={25} weight="light" />
                       <span>
-                        Promo {index + 1} ·{" "}
-                        {c.status === "available" ? "Available" : "Unavailable"}
+                        {t("Promo")} {index + 1} ·{" "}
+                        {c.status === "available"
+                          ? t("Available")
+                          : t("Unavailable")}
                       </span>
                       <strong>{c.code}</strong>
                       <button
                         disabled={busy || c.status !== "available"}
-                        aria-label={`Select promo ${index + 1}`}
+                        aria-label={t("Select promo {number}", {
+                          number: index + 1,
+                        })}
                         onClick={() => {
                           setChoice(c);
                           setName("");
@@ -692,27 +767,29 @@ function Rewards({ catalog }) {
                         }}
                       >
                         {c.status === "available"
-                          ? "SELECT PROMO"
-                          : "UNAVAILABLE"}
+                          ? t("SELECT PROMO")
+                          : t("UNAVAILABLE")}
                       </button>
                     </article>
                   ))}
                 </div>
                 {!state.codes?.length && (
                   <p>
-                    There are no promo codes available now. Please contact our
-                    team.
+                    {t(
+                      "There are no promo codes available now. Please contact our team.",
+                    )}
                   </p>
                 )}
                 <p className="fine">
-                  Your name and phone number are only used to fill the WhatsApp
-                  message. They are not saved on this website.
+                  {t(
+                    "Your name and phone number are only used to fill the WhatsApp message. They are not saved on this website.",
+                  )}
                 </p>
               </>
             )}
             {error && (
               <p className="error" role="alert" id="reward-error">
-                {error}
+                {t(error)}
               </p>
             )}
             {state && (
@@ -721,19 +798,19 @@ function Rewards({ catalog }) {
                 disabled={busy}
                 onClick={changeAccess}
               >
-                Use a different access code
+                {t("Use a different access code")}
               </button>
             )}
             <p className="privacy-note">
-              <LockSimple size={15} /> Each access code can select one promo
-              code.
+              <LockSimple size={15} />
+              {t("Each access code can select one promo code.")}
             </p>
           </div>
         )}
       </section>
       {choice && (
         <Modal
-          title="Send your promo code"
+          title={t("Send your promo code")}
           onClose={() => !busy && setChoice(null)}
         >
           <form
@@ -742,10 +819,11 @@ function Rewards({ catalog }) {
             aria-busy={busy}
           >
             <p>
-              Enter your details for the WhatsApp message. Goove will not save
-              this information on the website.
+              {t(
+                "Enter your details for the WhatsApp message. Goove will not save this information on the website.",
+              )}
             </p>
-            <label htmlFor="promo-name">Name</label>
+            <label htmlFor="promo-name">{t("Name")}</label>
             <input
               id="promo-name"
               name="customer_name"
@@ -760,7 +838,7 @@ function Rewards({ catalog }) {
                 setName(e.target.value);
               }}
             />
-            <label htmlFor="promo-phone">Phone number</label>
+            <label htmlFor="promo-phone">{t("Phone number")}</label>
             <input
               id="promo-phone"
               name="customer_phone"
@@ -768,7 +846,7 @@ function Rewards({ catalog }) {
               autoComplete="tel"
               inputMode="tel"
               pattern={phonePattern}
-              title="Enter a valid phone number"
+              title={t("Enter a valid phone number")}
               maxLength={30}
               required
               value={phone}
@@ -778,11 +856,12 @@ function Rewards({ catalog }) {
               }}
             />
             <p className="fine">
-              Selected promo code: <strong>{choice.code}</strong>
+              {t("Selected promo code:")} <strong>{choice.code}</strong>
             </p>
             <p className="fine">
-              Goove will add the system-generated active date and time to your
-              WhatsApp message.
+              {t(
+                "Goove will add the system-generated active date and time to your WhatsApp message.",
+              )}
             </p>
             {error && (
               <p className="error" role="alert">
@@ -790,7 +869,7 @@ function Rewards({ catalog }) {
               </p>
             )}
             <button disabled={busy}>
-              {busy ? "RESERVING PROMO…" : "CONTINUE TO WHATSAPP"}{" "}
+              {busy ? t("RESERVING PROMO…") : t("CONTINUE TO WHATSAPP")}{" "}
               <WhatsappLogo size={18} />
             </button>
             <button
@@ -799,7 +878,7 @@ function Rewards({ catalog }) {
               disabled={busy}
               onClick={() => setChoice(null)}
             >
-              CANCEL
+              {t("CANCEL")}
             </button>
           </form>
         </Modal>

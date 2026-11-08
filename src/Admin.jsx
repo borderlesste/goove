@@ -1,3 +1,4 @@
+import { TranslationFields } from "./TranslationFields";
 import React, { useEffect, useRef, useState } from "react";
 import { callApi, supabase, configured } from "./api";
 import { SignOut } from "@phosphor-icons/react/dist/csr/SignOut";
@@ -872,6 +873,17 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
           onChange={(e) => set("description", e.target.value)}
         />
       </label>
+      <TranslationFields
+        value={draft.translations}
+        onChange={(value) => set("translations", value)}
+        fields={[
+          { key: "name", label: "Name", max: 100 },
+          { key: "description", label: "Description", max: 500 },
+          ...(type === "Handbags"
+            ? [{ key: "specifications", label: "Specifications", max: 1500 }]
+            : []),
+        ]}
+      />
       <>
         {type === "Handbags" && (
           <label>
@@ -1085,6 +1097,11 @@ function Settings({ settings, busy, save }) {
           disabled={uploading}
         />
       </label>
+      <p className="fine">
+        Recommended: 1600 × 1000 pixels (8:5), JPG, PNG, or WebP, under 5 MB.
+        The full photo is fitted inside the banner on every screen; other
+        proportions may leave space around it.
+      </p>
       {s.hero_image_url && (
         <img
           className="banner-preview"
@@ -1092,6 +1109,16 @@ function Settings({ settings, busy, save }) {
           alt="Current home page banner"
         />
       )}
+      <TranslationFields
+        value={s.translations}
+        onChange={(value) => set("translations", value)}
+        fields={[
+          { key: "hero_heading", label: "Banner headline", max: 120 },
+          { key: "hero_description", label: "Banner description", max: 400 },
+          { key: "hero_cta_text", label: "Banner button text", max: 50 },
+          { key: "promo_banner_text", label: "Promo flag text", max: 150 },
+        ]}
+      />
       <h3>Floating promo flag</h3>
       <p>This message stays visible as customers scroll the public website.</p>
       <label>

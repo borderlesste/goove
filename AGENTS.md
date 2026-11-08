@@ -25,9 +25,10 @@ product names immediately, without reserved extra title lines. WhatsApp inquirie
 must include a canonical link that opens the exact bag and selected photo in
 Quick View, plus the direct public image URL. Show only verified
 owner-entered specifications; never invent materials or dimensions.
-Keep the hero near its previous 360–380px desktop height (180px image on mobile),
-with the full photograph scaled to fit inside its frame without cropping,
-tighter space above the hero,
+Use a standard 8:5 banner photo frame (maximum 576px wide on desktop,
+400px on mobile) with the full photograph fitted inside without cropping.
+Recommend 1600 × 1000 uploads and show the same contained frame in Admin.
+Keep the desktop hero near 360–380px tall with tighter space above it,
 and a dense collection of five columns on wide screens and two on phones.
 Use smaller product images and tight card spacing; avoid reserved empty blocks
 between description and price. Do not show a fallback request for materials,
@@ -66,3 +67,14 @@ When implementing from a selected generated mock, treat that image as the source
 Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts/prepare-sites-build.mjs`, and `tests/sites-worker.test.mjs` intact so the same local prototype can be handed to Sites. Before a Sites handoff, run `npm run build` and `npm run test:sites`; the build must leave `dist/client/index.html`, `dist/server/index.js`, and `dist/.openai/hosting.json`.
 
 Prototype preferences: In Admin → Codes, keep the dedicated promo-code refresh control directly below “Each promo code can be selected once. Pause a code to remove it from the customer list.” Keep access-code refresh separate. Promo-code refresh must ask for confirmation, change the code while keeping the promotion listed for customers, and preserve the selection identifier. Every active promotion must appear in the public gift catalog and have one available promo code; show already-selected codes in the customer list as unavailable instead of removing them. Create a code automatically when a promotion is created or reactivated. Customers with a verified access code can refresh the available-code list without gaining another selection. Refreshing an access code must not change promo-code status. In Admin → Gifts, provide a direct way to hide and reactivate each promotion; hidden promotions stay out of both customer-facing gift and promo lists. In Admin → Settings, allow the owner to manage the public phone number, email address, and social media links shown on the customer-facing site. Let the owner upload 1–3 ordered photos for each handbag and gift, and use consistent, standard photo frames and readable text sizes on Rewards.
+
+Customer-facing navigation, shop controls, and Rewards support English, French,
+Haitian Creole, and Spanish. Remember the visitor’s selected language locally and
+set the document language. Provide optional Admin translation fields for names, descriptions, specifications,
+banner copy, and the promo flag in all four languages. Show supplied translations
+and fall back to original wording for missing fields. Never translate
+product IDs, access/promo codes, URLs, or stored owner data by changing the source.
+
+Keep product photos clear: no visible Quick View badge over the image; clicking
+or keyboard-activating the photo still opens Quick View. Gallery arrows are small
+30px circular controls with 14px icons, positioned near the photo edges.
