@@ -144,6 +144,16 @@ test("cards and actions align even when descriptions expand", async ({
       .boundingBox();
     expect(description.y - title.y - title.height).toBeLessThanOrEqual(5);
   }
+  const preview = await card.locator(".product-description").evaluate((p) => ({
+    height: p.getBoundingClientRect().height,
+    lineHeight: parseFloat(getComputedStyle(p).lineHeight),
+  }));
+  expect(preview.height / preview.lineHeight).toBeLessThanOrEqual(2.51);
+  for (const item of await page.locator(".bag").all()) {
+    const details = await item.locator(".product-read-more").boundingBox();
+    const price = await item.locator(".product-price").boundingBox();
+    expect(price.y - details.y - details.height).toBeLessThanOrEqual(5);
+  }
   await assertAlignedCards(page);
   await toggle.click();
   await expect(

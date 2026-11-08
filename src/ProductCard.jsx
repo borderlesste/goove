@@ -177,7 +177,7 @@ export function ProductCard({ bag, phone, target }) {
         <p
           ref={descriptionRef}
           id={descriptionId}
-          className={`product-description${expanded ? " expanded" : ""}`}
+          className={`product-description${expanded ? " expanded" : overflowing ? " is-truncated" : ""}`}
         >
           {description}
         </p>

@@ -199,10 +199,10 @@
     serif;
   overflow-wrap: anywhere;
 }
+/* Two full lines and a faded half-line keep previews compact. */
 .bag .product-description {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  display: block;
+  max-height: 3.875em;
   overflow: hidden;
   min-height: 0;
   font:
@@ -211,16 +211,24 @@
   overflow-wrap: anywhere;
   color: #66685f;
 }
+.bag .product-description.is-truncated {
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 0.775em),
+    transparent
+  );
+}
 .bag .product-description.expanded {
-  display: block;
+  max-height: none;
   overflow: visible;
+  mask-image: none;
 }
 .product-read-more {
   margin: 0;
 }
 .product-read-more button {
-  min-height: 30px;
-  padding: 5px 0;
+  min-height: 24px;
+  padding: 2px 0;
   border: 0;
   background: none;
   color: #3e5545;
@@ -231,7 +239,7 @@
   text-underline-offset: 4px;
 }
 .bag .product-price {
-  margin: 8px 0;
+  margin: 4px 0 6px;
   padding-top: 0;
   font:
     500 16px/1.5 "Inter",
@@ -305,7 +313,7 @@
 }
 .product-purchase .buy-hint {
   margin: 6px 0 0;
-  min-height: 2.8em;
+  min-height: 0;
   font:
     400 11px/1.4 "Inter",
     sans-serif;

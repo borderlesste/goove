@@ -78,3 +78,9 @@ product IDs, access/promo codes, URLs, or stored owner data by changing the sour
 Keep product photos clear: no visible Quick View badge over the image; clicking
 or keyboard-activating the photo still opens Quick View. Gallery arrows are small
 30px circular controls with 14px icons, positioned near the photo edges.
+
+Product-card descriptions show at most two full lines plus a faded half-line,
+with a compact Read more/Read less control only when text overflows. Keep the
+price within 4px of the preview/control and avoid reserved hint space. Catalog
+descriptions must have saved French, Haitian Creole and Spanish translations;
+use the existing Admin translation fields for new or edited descriptions.

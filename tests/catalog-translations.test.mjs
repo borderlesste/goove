@@ -1,0 +1,20 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { PGlite } from '@electric-sql/pglite';
+test('catalog translation fill preserves source text, owner translations and later edits', async()=>{
+ const db=new PGlite();
+ await db.exec("create table handbags(description text,translations jsonb default '{}'); create table gift_types(description text,translations jsonb default '{}');");
+ const original='A modern classic with everyday ease and enduring appeal.';
+ await db.query('insert into handbags(description,translations) values($1,$2),($3,$4)',[original,JSON.stringify({fr:{description:'Mon texte',name:'Mon sac'}}),'A later owner edit',JSON.stringify({})]);
+ const sql=await readFile(new URL('../supabase/data/fill_catalog_description_translations.sql',import.meta.url),'utf8');
+ await db.exec(sql);await db.exec(sql);
+ const {rows}=await db.query('select * from handbags order by description desc');
+ assert.equal(rows[0].description,original);
+ assert.equal(rows[0].translations.fr.description,'Mon texte');
+ assert.equal(rows[0].translations.fr.name,'Mon sac');
+ assert.match(rows[0].translations.ht.description,/modèl klasik/);
+ assert.match(rows[0].translations.es.description,/clásico moderno/);
+ assert.deepEqual(rows[1].translations,{});
+ await db.close();
+});
