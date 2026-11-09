@@ -86,12 +86,12 @@ descriptions must have saved French, Haitian Creole and Spanish translations;
 use the existing Admin translation fields for new or edited descriptions.
 
 Goove sells handbags and watches, led by women’s watches with select men’s styles.
-Public routes are / (curated home), /watches (women first, then men), /handbags
+Public routes are / (home catalog), /watches (women first, then men), /handbags
 (full handbag catalog), and /rewards. Admin has separate Handbags and Watches
-sections. Product category, audience and an explicit Feature on home page control
-use the existing product storage and preserve IDs/gallery/order links. New products
-are not featured by default. Shared links must open an exact item even when it is
-not featured. Never list reward gifts as products without an owner-entered price.
+sections. Product category, audience and an explicit Show on home page control
+use the existing product storage and preserve IDs/gallery/order links. All products appear on Home by default; unchecking Show on home page
+keeps an item only in its shop collection. Shared links must open an exact item even when it is
+not shown on Home; legacy home links for excluded items open the shop collection. Never list reward gifts as products without an owner-entered price.
 Maintain mixed watches/handbags copy in all four supported languages.
 
 Product display order shuffles locally on refresh and after the customer returns

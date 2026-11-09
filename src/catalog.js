@@ -9,5 +9,5 @@ export function collectionProducts(products, collection, audience) {
   );
 }
 export function featuredProducts(products) {
-  return products.filter((product) => product.featured === true);
+  return products.filter((product) => product.featured !== false);
 }

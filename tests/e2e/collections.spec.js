@@ -147,7 +147,7 @@ test("watch inquiry links reopen the exact watch and photo, and non-featured han
   ).toBeVisible();
 });
 
-test("owner manages watch audience and home placement, and new products default to collection only", async ({
+test("owner manages watch audience and home placement, and new products default to home visibility", async ({
   page,
 }) => {
   const user = {
@@ -201,12 +201,12 @@ test("owner manages watch audience and home placement, and new products default 
   const row = page.locator(".catalog-row").filter({ hasText: "Women’s watch" });
   await row.getByRole("button", { name: "Edit", exact: true }).click();
   await expect(
-    page.getByLabel("Feature on home page", { exact: true }),
+    page.getByLabel("Show on home page", { exact: true }),
   ).not.toBeChecked();
   await page
     .getByLabel("Collection audience", { exact: true })
     .selectOption("men");
-  await page.getByLabel("Feature on home page", { exact: true }).check();
+  await page.getByLabel("Show on home page", { exact: true }).check();
   await page.getByRole("button", { name: "SAVE CHANGES", exact: true }).click();
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0].item).toMatchObject({
@@ -216,7 +216,7 @@ test("owner manages watch audience and home placement, and new products default 
   });
   await expect(
     page.locator(".catalog-row").filter({ hasText: "Women’s watch" }),
-  ).toContainText("Featured on home");
+  ).toContainText("Shown on home");
   await page.getByRole("button", { name: "Add watch", exact: true }).click();
   await expect(
     page.getByLabel("Product collection", { exact: true }),
@@ -225,10 +225,48 @@ test("owner manages watch audience and home placement, and new products default 
     page.getByLabel("Collection audience", { exact: true }),
   ).toHaveValue("women");
   await expect(
-    page.getByLabel("Feature on home page", { exact: true }),
-  ).not.toBeChecked();
+    page.getByLabel("Show on home page", { exact: true }),
+  ).toBeChecked();
   await page.goto("/");
   await expect(
     page.getByRole("article", { name: "Women’s watch", exact: true }),
   ).toBeVisible();
+});
+
+test("explicitly unchecking a product hides it only from Home", async ({
+  page,
+}) => {
+  const hidden = {
+    ...products[0],
+    id: "shop-only",
+    name: "Shop-only item",
+    featured: false,
+  };
+  const visible = {
+    ...products[0],
+    id: "default-home",
+    name: "Default home item",
+  };
+  delete visible.featured;
+  await page.route("**/functions/v1/goove-api", (route) =>
+    route.fulfill({
+      json: { handbags: [hidden, visible], gifts: [], settings },
+    }),
+  );
+  await page.goto("/");
+  await expect(
+    page.getByRole("article", { name: "Default home item", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("article", { name: "Shop-only item", exact: true }),
+  ).toHaveCount(0);
+  await page.goto("/handbags");
+  await expect(
+    page.getByRole("article", { name: "Shop-only item", exact: true }),
+  ).toBeVisible();
+  await page.goto("/?bag=shop-only&photo=1#bag-shop-only");
+  await expect(
+    page.getByRole("dialog", { name: "Shop-only item", exact: true }),
+  ).toBeVisible();
+  await expect(page).toHaveURL(/\/handbags\?bag=shop-only/);
 });

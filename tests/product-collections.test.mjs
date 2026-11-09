@@ -8,7 +8,7 @@ import {productLink,readProductTarget} from '../src/productLinks.js';
 
 test('collections and home curation use explicit placement rather than product creation',()=>{
  const items=[{id:'old'},{id:'bag',category:'handbag',featured:true},{id:'women',category:'watch',audience:'women'},{id:'men',category:'watch',audience:'men',featured:true}];
- assert.deepEqual(featuredProducts(items).map(p=>p.id),['bag','men']);
+ assert.deepEqual(featuredProducts(items).map(p=>p.id),['old','bag','women','men']);
  assert.deepEqual(collectionProducts(items,'watch','women').map(p=>p.id),['women']);
  assert.deepEqual(collectionProducts(items,'watch','men').map(p=>p.id),['men']);
  assert.deepEqual(collectionProducts(items,'handbag').map(p=>p.id),['old','bag']);
@@ -31,5 +31,19 @@ test('product collection migration preserves products and selections while new i
  assert.equal((await db.query('select featured from handbags where id=1')).rows[0].featured,false);
  assert.equal((await db.query('select hero_description from goove_settings')).rows[0].hero_description,'Custom owner copy');
  await assert.rejects(db.exec("update handbags set category='gift' where id=10"),/check constraint/);
+ await db.close();
+});
+
+test('home visibility migration restores the catalog once and preserves future unchecked items',async()=>{
+ const db=new PGlite();
+ await db.exec("create table handbags(id int primary key,featured boolean not null default false); insert into handbags values(1,false),(2,true),(3,false);");
+ const dir=new URL('../supabase/migrations/',import.meta.url),file=(await readdir(dir)).find(n=>n.endsWith('_default_products_visible_on_home.sql'));
+ const sql=await readFile(new URL(file,dir),'utf8');await db.exec(sql);
+ assert.equal((await db.query('select count(*)::int n from handbags where featured')).rows[0].n,3);
+ await db.exec('update handbags set featured=false where id=1; insert into handbags(id) values(4);');
+ await db.exec(sql);
+ assert.deepEqual((await db.query('select featured from handbags where id=1')).rows[0],{featured:false});
+ assert.deepEqual((await db.query('select featured from handbags where id=4')).rows[0],{featured:true});
+ assert.equal((await db.query('select count(*)::int n from handbags')).rows[0].n,4);
  await db.close();
 });

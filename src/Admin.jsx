@@ -477,7 +477,7 @@ export function Admin({ onCatalogChange }) {
                 setEditing({
                   category: tab === "Watches" ? "watch" : "handbag",
                   audience: "women",
-                  featured: false,
+                  featured: true,
                   name: "",
                   description: "",
                   image_url: "",
@@ -533,7 +533,9 @@ export function Admin({ onCatalogChange }) {
                     {tab !== "Gifts" && (
                       <small>
                         {b.audience === "men" ? "Men" : "Women"} ·{" "}
-                        {b.featured ? "Featured on home" : "Collection only"}
+                        {b.featured !== false
+                          ? "Shown on home"
+                          : "Collection only"}
                       </small>
                     )}
                     <small>
@@ -816,7 +818,7 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
       ...item,
       category: item.category || (type === "Watches" ? "watch" : "handbag"),
       audience: item.audience || "women",
-      featured: item.featured === true,
+      featured: item.featured !== false,
       gallery_images:
         item.gallery_images || (item.image_url ? [item.image_url] : []),
     })),
@@ -917,11 +919,11 @@ function Editor({ item, type, busy, onSave, onCancel, onError }) {
               checked={draft.featured}
               onChange={(e) => set("featured", e.target.checked)}
             />{" "}
-            Feature on home page
+            Show on home page
           </label>
           <p className="fine">
-            New products appear in their collection. Only selected products
-            appear on the home page.
+            Products appear on Home by default. Uncheck this option to show an
+            item only in its shop collection.
           </p>
         </fieldset>
       )}

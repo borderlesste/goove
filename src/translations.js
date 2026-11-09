@@ -1,5 +1,10 @@
 // English source copy, followed by French, Haitian Creole, and Spanish.
 export const translations = {
+  "Our watches & handbags.": [
+    "Nos montres et sacs à main.",
+    "Mont ak valiz nou yo.",
+    "Nuestros relojes y bolsos.",
+  ],
   "WATCHES & HANDBAGS": [
     "MONTRES ET SACS",
     "MONT AK VALIZ",

@@ -422,6 +422,6 @@ test("three-photo galleries open the shared photo and cycle with previous and ne
   await page.locator(".promo-flag").click();
   await expect(page).toHaveURL(/\/#collection$/);
   await expect(
-    page.getByRole("heading", { name: "Featured watches & handbags." }),
+    page.getByRole("heading", { name: "Our watches & handbags." }),
   ).toBeInViewport();
 });

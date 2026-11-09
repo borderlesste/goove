@@ -104,15 +104,22 @@ export function App() {
     adminPage = path === "/admin",
     collectionPage = path === "/watches" || path === "/handbags";
   const homeProducts = featuredProducts(catalog.handbags);
-  if (
-    productTarget &&
-    !homeProducts.some((product) => product.id === productTarget.id)
-  ) {
+  useEffect(() => {
+    if (path !== "/" || loading || !productTarget) return;
     const selected = catalog.handbags.find(
       (product) => product.id === productTarget.id,
     );
-    if (selected) homeProducts.push(selected);
-  }
+    if (selected?.featured !== false) return;
+    const destination = new URL(location.href);
+    destination.pathname =
+      selected.category === "watch" ? "/watches" : "/handbags";
+    history.replaceState(
+      history.state,
+      "",
+      destination.pathname + destination.search + destination.hash,
+    );
+    setPath(destination.pathname);
+  }, [path, loading, catalog.handbags, productTarget]);
   useEffect(() => {
     if (adminPage || rewards || loading || !productTarget) return;
     document
@@ -291,9 +298,7 @@ export function App() {
             >
               <div className="section-heading">
                 <p className="eyebrow">{t("THE COLLECTION")}</p>
-                <h2 id="collection-heading">
-                  {t("Featured watches & handbags.")}
-                </h2>
+                <h2 id="collection-heading">{t("Our watches & handbags.")}</h2>
                 <p>
                   {t(
                     "Women’s watches lead our collection, complemented by select men’s watches and distinctive handbags.",

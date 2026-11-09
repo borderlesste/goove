@@ -59,7 +59,7 @@ export const sampleBags = [
   image_url: `/images/${id}.webp`,
   category: "handbag",
   audience: "women",
-  featured: i < 6,
+  featured: true,
   price: null,
   display_order: i,
 }));
