@@ -15,6 +15,7 @@ export function Modal({ title, onClose, children, className = "" }) {
       dialog.close();
       document.body.style.overflow = overflow;
       if (prior?.isConnected) prior.focus({ preventScroll: true });
+      window.dispatchEvent(new Event("goove:modal-closed"));
     };
   }, []);
   return (

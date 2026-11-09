@@ -1,3 +1,4 @@
+import { useProductOrder } from "./useProductOrder";
 import { CollectionPage } from "./CollectionPage";
 import { featuredProducts } from "./catalog";
 import { LanguageSelector, useLanguage, localizedContent } from "./i18n";
@@ -43,18 +44,17 @@ export function App() {
     [productTarget, setProductTarget] = useState(() =>
       readProductTarget(location.href),
     );
+  const orderedProducts = useProductOrder(sourceCatalog.handbags);
   const catalog = useMemo(
     () => ({
       ...sourceCatalog,
       settings: localizedContent(sourceCatalog.settings, language),
-      handbags: sourceCatalog.handbags.map((item) =>
-        localizedContent(item, language),
-      ),
+      handbags: orderedProducts.map((item) => localizedContent(item, language)),
       gifts: sourceCatalog.gifts.map((item) =>
         localizedContent(item, language),
       ),
     }),
-    [sourceCatalog, language],
+    [sourceCatalog, orderedProducts, language],
   );
   async function refresh() {
     try {

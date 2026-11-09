@@ -15,8 +15,8 @@ Show success only after a confirmed identity is verified by Supabase Auth.
 
 Storefront design: use a compact split hero with text on the left and proportional
 photography on the right; stack on mobile. Heading: “Elevate Your Elegance”.
-Subtitle: “Women’s watches and handbags, with select men’s watches.” Use Playfair
-Display headings, Inter body text, and restrained Cinzel accents. Keep product
+Subtitle: “Women’s watches and handbags, with select men’s watches.” Use Inter throughout with bold 700–800 headings, 600-weight controls and
+500-weight body text, dark readable copy and a modern sans-serif wordmark. Keep product
 cards equal height with purchase actions aligned, expandable descriptions, and
 image-triggered accessible Quick View. Keep the gift promotion visible across
 routes and scrolling as an animated ribbon in a sticky top strip, with reduced
@@ -93,3 +93,10 @@ use the existing product storage and preserve IDs/gallery/order links. New produ
 are not featured by default. Shared links must open an exact item even when it is
 not featured. Never list reward gifts as products without an owner-entered price.
 Maintain mixed watches/handbags copy in all four supported languages.
+
+Product display order shuffles locally on refresh and after the customer returns
+from at least five minutes away (hidden tab, app switch or window blur). Keep order
+stable during active browsing and language/route changes. Defer a return shuffle
+until any open dialog closes. Never change featured membership, category/audience,
+product IDs, persisted display_order, owner lists or reward-code order. Watch
+images and titles open the same accessible detailed Quick View used by handbags.

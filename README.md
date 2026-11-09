@@ -56,7 +56,8 @@ unchanged; shared copy now covers watches and handbags in all four languages.
 
 ## Storefront
 
-The hero uses Playfair Display with Inter body text and Cinzel accents. The
+The site uses Inter throughout, with bold headings, stronger controls and
+high-contrast sans-serif body text. The
 collection keeps equal-height cards and aligned purchase actions, including when
 descriptions expand. Selecting a product image opens an accessible Quick View
 with the original gallery photos, full description, availability, and price.
@@ -190,3 +191,9 @@ migrations; do not replay the bootstrap schema.
 
 Workflow: work and publish directly on `main`, without worktrees or PRs, per the
 repository owner's instruction. Run verification before pushing.
+
+Product display order is shuffled in the browser on refresh and after returning
+from five minutes away. It stays steady during active browsing, language changes
+and route changes. An open modal defers the return shuffle until it closes.
+Featured selection, women/men sections, saved display order, owner inventory and
+reward codes are unaffected. Images and product titles open shared Quick View.

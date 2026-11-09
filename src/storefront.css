@@ -11,7 +11,7 @@
   min-width: 0;
 }
 .hero-copy .eyebrow {
-  font-family: "Cinzel", Georgia, serif;
+  font-family: "Inter", Arial, sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 2.5px;
@@ -19,9 +19,9 @@
   margin-bottom: 12px;
 }
 .hero-copy h1 {
-  font-family: "Playfair Display", Georgia, serif;
+  font-family: "Inter", Arial, sans-serif;
   font-size: clamp(40px, 4.1vw, 58px);
-  font-weight: 400;
+  font-weight: 500;
   line-height: 1.12;
   letter-spacing: -1.5px;
   max-width: 560px;
@@ -32,7 +32,7 @@
 }
 .hero-copy .hero-subtitle {
   font:
-    400 15px/1.6 "Inter",
+    500 15px/1.6 "Inter",
     sans-serif;
   color: #5e625a;
   max-width: 420px;
@@ -91,7 +91,7 @@
   text-align: center;
 }
 .section-heading .eyebrow {
-  font-family: "Cinzel", Georgia, serif;
+  font-family: "Inter", Arial, sans-serif;
   font-size: 11px;
   letter-spacing: 2.5px;
   margin-bottom: 8px;
@@ -105,7 +105,7 @@
 }
 .section-heading > p:last-child {
   font:
-    400 15px/1.8 "Inter",
+    500 15px/1.8 "Inter",
     sans-serif;
 }
 .bag-grid {
@@ -194,9 +194,9 @@
   min-height: 0;
   margin: 0 0 4px;
   font:
-    400 19px/1.3 "Playfair Display",
-    Georgia,
-    serif;
+    500 19px/1.3 "Inter",
+    Arial,
+    sans-serif;
   overflow-wrap: anywhere;
 }
 /* Two full lines and a faded half-line keep previews compact. */
@@ -206,7 +206,7 @@
   overflow: hidden;
   min-height: 0;
   font:
-    400 12px/1.55 "Inter",
+    500 12px/1.55 "Inter",
     sans-serif;
   overflow-wrap: anywhere;
   color: #66685f;
@@ -315,7 +315,7 @@
   margin: 6px 0 0;
   min-height: 0;
   font:
-    400 11px/1.4 "Inter",
+    500 11px/1.4 "Inter",
     sans-serif;
   color: #72746b;
   text-align: center;
@@ -484,9 +484,9 @@ dialog.product-modal {
 }
 .product-details .eyebrow {
   font:
-    500 10px/1.8 "Cinzel",
-    Georgia,
-    serif;
+    500 10px/1.8 "Inter",
+    Arial,
+    sans-serif;
   letter-spacing: 2px;
   margin: 0 0 14px;
 }
@@ -826,4 +826,61 @@ dialog.product-modal {
 
 .collection .empty {
   padding: 16px 0 24px;
+}
+
+/* Shared modern typography, including Studio, Rewards and Quick View. */
+h1,
+h2,
+h3 {
+  font-family: "Inter", Arial, sans-serif;
+  font-weight: 700;
+}
+.wordmark,
+.footer-brand {
+  font-family: "Inter", Arial, sans-serif;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+.eyebrow {
+  font-weight: 700;
+}
+
+:root {
+  --muted: #4c554f;
+}
+.hero-copy h1 {
+  font-weight: 800;
+}
+.bag h3 {
+  font-weight: 700;
+}
+.bag h3 a {
+  display: inline;
+}
+.bag h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hero-copy .eyebrow,
+.section-heading .eyebrow,
+.product-details .eyebrow {
+  font-weight: 700;
+}
+nav,
+label,
+button,
+.button,
+.hero-copy .button,
+.product-purchase .buy-button {
+  font-weight: 600;
+}
+.bag .product-price,
+.product-details .product-detail-price {
+  font-weight: 700;
+}
+p,
+.hero-copy .hero-subtitle,
+.bag .product-description,
+.section-heading > p:last-child {
+  color: #4c554f;
 }

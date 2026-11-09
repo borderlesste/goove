@@ -174,7 +174,24 @@ export function ProductCard({ bag, phone, target }) {
         {photoArrows}
       </div>
       <div className="product-copy">
-        <h3>{bag.name}</h3>
+        <h3>
+          <a
+            href={itemLink}
+            onClick={(event) => {
+              if (
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey
+              )
+                return;
+              event.preventDefault();
+              setQuickView(true);
+            }}
+          >
+            {bag.name}
+          </a>
+        </h3>
         <p
           ref={descriptionRef}
           id={descriptionId}
